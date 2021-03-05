@@ -37,8 +37,10 @@ Server will be launched if needed, those environments variables will be set :
 TLS env variables 
 * TEST_DB_SERVER_CERT_STRING server certificate chain
 * TEST_DB_SERVER_CERT path to server certificate
-* TEST_DB_SERVER_PRIVATE_KEY_PATH
-* TEST_DB_SERVER_PUBLIC_KEY_PATH
+* TEST_DB_RSA_PUBLIC_KEY (mysql) RSA public key
+* TEST_DB_CLIENT_KEY client private key 
+* TEST_DB_CLIENT_CERT client cert 
+* TEST_DB_CLIENT_PKCS client pkcs12 store (password 'kspass')
 
 others  
 * TEST_DB_USER user

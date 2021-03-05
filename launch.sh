@@ -13,9 +13,12 @@ generate_ssl () {
   cat /tmp/ssl/ca.crt /tmp/ssl/server.crt > /tmp/ssl/ca_server.crt
   export TEST_DB_SERVER_CERT=/tmp/ssl/ca_server.crt
   export TEST_DB_SERVER_CERT_STRING=$(cat /tmp/ssl/ca_server.crt)
-
-  export TEST_DB_SERVER_PRIVATE_KEY_PATH=/tmp/ssl/server.key
-  export TEST_DB_SERVER_PUBLIC_KEY_PATH=/tmp/ssl/public.key
+  export TEST_DB_RSA_PUBLIC_KEY=/tmp/ssl/public.key
+  #export TEST_DB_SERVER_CA_CERT=/tmp/ssl/ca.crt
+  #export TEST_DB_SERVER_INTERMEDIATE_CERT=/tmp/ssl/server.crt
+  export TEST_DB_CLIENT_KEY=/tmp/ssl/client.key
+  export TEST_DB_CLIENT_CERT=/tmp/ssl/client.crt
+  export TEST_DB_CLIENT_PKCS=/tmp/ssl/client-keystore.p12
 }
 
 # decrypt
