@@ -18,7 +18,7 @@ generate_ssl () {
   #export TEST_DB_SERVER_INTERMEDIATE_CERT=/tmp/ssl/server.crt
   export TEST_DB_CLIENT_KEY=/tmp/ssl/client.key
   export TEST_DB_CLIENT_CERT=/tmp/ssl/client.crt
-  export TEST_DB_CLIENT_PKCS=/tmp/ssl/client-keystore.p12
+  export TEST_DB_CLIENT_PKCS=/tmp/ssl/fullclient-keystore.p12
 }
 
 # decrypt

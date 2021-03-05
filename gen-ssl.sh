@@ -34,7 +34,6 @@ main() {
   local csrFile=$(mktemp)
   local clientCertFile="${sslDir}/client.crt"
   local clientKeyFile="${sslDir}/client.key"
-  local clientKeystoreFile="${sslDir}/client-keystore.jks"
   local tmpKeystoreFile=$(mktemp)
   local pcks12FullKeystoreFile="${sslDir}/fullclient-keystore.p12"
   local clientReqFile=$(mktemp)
@@ -110,17 +109,6 @@ main() {
   -out "${tmpKeystoreFile}" \
   -name "mysqlAlias" \
   -passout pass:kspass
-
-  # convert PKSC12 to JKS
-  keytool \
-  -importkeystore \
-  -deststorepass kspass \
-  -destkeypass kspass \
-  -destkeystore "${clientKeystoreFile}" \
-  -srckeystore ${tmpKeystoreFile} \
-  -srcstoretype PKCS12 \
-  -srcstorepass kspass \
-  -alias "mysqlAlias"
 
   # Now generate a full keystore with the client cert & key + trust certificates
   log "Generating full client keystore"
