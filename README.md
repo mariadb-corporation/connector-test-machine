@@ -26,6 +26,8 @@ possible TYPE value :
 
 version is mandatory for non skysql env.
 
+environment key CONNECTOR_TEST_SECRET_KEY must be set for skysql and enterprise. 
+
 example :
 ```
 source ./launch.sh -tmariadb -v10.5 -dtestj
