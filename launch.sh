@@ -54,11 +54,15 @@ launch_docker () {
 
   if [[ "$TYPE" == mysql ]] ; then
     if [[ "$VERSION" == 5.7 ]] ; then
-      export ADDITIONAL_CONF="--default-authentication-plugin=mysql_native_password --sha256-password-public-key-path=/etc/sslcert/public.key --sha256-password-private-key-path=/etc/sslcert/server.key"
+      export ADDITIONAL_CONF="--sha256-password-public-key-path=/etc/sslcert/public.key --sha256-password-private-key-path=/etc/sslcert/server.key"
     else
-      export ADDITIONAL_CONF="--default-authentication-plugin=mysql_native_password --caching-sha2-password-private-key-path=/etc/sslcert/server.key --caching-sha2-password-public-key-path=/etc/sslcert/public.key --sha256-password-public-key-path=/etc/sslcert/public.key --sha256-password-private-key-path=/etc/sslcert/server.key"
+      export ADDITIONAL_CONF="--caching-sha2-password-private-key-path=/etc/sslcert/server.key --caching-sha2-password-public-key-path=/etc/sslcert/public.key --sha256-password-public-key-path=/etc/sslcert/public.key --sha256-password-private-key-path=/etc/sslcert/server.key"
+    fi
+    if [ -z "$NATIVE" ] || [[ "$NATIVE" == 1 ]] ; then
+      export ADDITIONAL_CONF="--default-authentication-plugin=mysql_native_password $ADDITIONAL_CONF"
     fi
   fi
+
   echo "ending configuring mysql additional type"
   sleep 1
   if [ "$TYPE" == "maxscale" ] ; then
@@ -151,11 +155,12 @@ launch_docker () {
 
 export PROJ_PATH="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 DEBUG=false
-while getopts ":t:v:d:debug:" flag; do
+while getopts ":t:v:d:n:debug:" flag; do
     case "${flag}" in
         t) TYPE=${OPTARG};;
         v) VERSION=${OPTARG};;
         d) DATABASE=${OPTARG};;
+        n) NATIVE=("1" == ${OPTARG});;
         debug) DEBUG=("1" == ${OPTARG});;
     esac
 done
@@ -164,6 +169,7 @@ echo "TYPE: $TYPE"
 echo "VERSION: $VERSION"
 echo "DATABASE: $DATABASE"
 echo "DEBUG: $DEBUG"
+echo "NATIVE: $NATIVE"
 echo "PROJ_PATH: $PROJ_PATH"
 
 export TEST_DB_DATABASE=$DATABASE

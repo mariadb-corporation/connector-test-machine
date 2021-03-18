@@ -11,7 +11,7 @@ git-crypt unlock /path/to/testing_machine_key.txt
 
 ```
 git clone https://github.com/rusher/connector-test-machine.git
-source connector-test-machine/launch.sh -tTYPE -vVERSION -dDATABASE
+source connector-test-machine/launch.sh -tTYPE -vVERSION -dDATABASE -nNATIVE
 ```
 
 possible TYPE value : 
@@ -25,6 +25,8 @@ possible TYPE value :
 * skysql-ha
 
 version is mandatory for non skysql env.
+
+NATIVE permits to indicate if MySQL must use 'mysql_native_password' as default authentication plugin. Possible value "1" or "0". Default value "1".
 
 environment key CONNECTOR_TEST_SECRET_KEY must be set for skysql and enterprise. 
 
@@ -53,4 +55,3 @@ others
 * TEST_MAXSCALE_TLS_PORT (for maxscale, TLS port differ than port without ssl)
 * TEST_REQUIRE_TLS to indicate if connection required TLS
 * TEST_PAM_USER and TEST_PAM_PWD 
-
