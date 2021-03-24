@@ -37,28 +37,99 @@ decrypt () {
   rm /tmp/key.hex
 }
 
+# install local mariadb
+install_local () {
+  echo "install local version"
+  if [ "$TRAVIS_OS_NAME" == "linux" ] ; then
+    sudo apt-get purge mysql* mariadb*
+    sudo rm -rf /etc/mysql && sudo rm -rf /var/log/mysql && sudo rm -rf /var/lib/mysql && sudo rm -rf /var/lib/mysql-files && sudo rm -rf /var/lib/mysql-keyring
+
+    sudo apt-get install software-properties-common
+    sudo apt-key adv --fetch-keys 'https://mariadb.org/mariadb_release_signing_key.asc'
+
+    sudo add-apt-repository "deb [arch=amd64,arm64,ppc64el] http://mariadb.mirrors.ovh.net/MariaDB/repo/${VERSION}/ubuntu ${TRAVIS_DIST} main"
+    sudo apt update
+    echo "mariadb-server-${VERSION} mysql-server/root_password password heyPassw0@rd" | sudo debconf-set-selections
+    echo "mariadb-server-${VERSION} mysql-server/root_password_again password heyPassw0@rd" | sudo debconf-set-selections
+    sudo apt-get -y install mariadb-server
+    export TEST_DB_HOST=mariadb.example.com
+    export TEST_DB_PORT=3306
+    export TEST_DB_USER=boby
+    export TEST_DB_PASSWORD=heyPassw0@rd
+    export TEST_REQUIRE_TLS=0
+
+    echo "adding database and user"
+    if [ $VERSION == "10.2" ] || [ $VERSION == "10.3" ] ; then
+      mysql -uroot --password=heyPassw0@rd -e "create DATABASE IF NOT EXISTS ${TEST_DB_DATABASE}"
+      mysql -uroot --password=heyPassw0@rd ${TEST_DB_DATABASE} < $PROJ_PATH/travis/sql/dbinit.sql
+    else
+      sudo mysql -e "create DATABASE IF NOT EXISTS ${TEST_DB_DATABASE}"
+      sudo mysql ${TEST_DB_DATABASE} < $PROJ_PATH/travis/sql/dbinit.sql
+    fi
+    echo "adding database and user done"
+
+
+    # configuration addition (ssl mostly)
+    sudo cp $PROJ_PATH/travis/unix.cnf /etc/mysql/conf.d/unix.cnf
+    sudo ls -lrt /etc/mysql/conf.d/
+    sudo chmod +xr /etc/mysql/conf.d/unix.cnf
+    tail /etc/mysql/conf.d/unix.cnf
+
+    echo "restart mariadb server"
+
+    sudo service mariadb restart
+
+    # wait for initialisation
+    check_server_status
+    echo 'server up !'
+  fi
+}
+
+check_server_status () {
+  mysqlCmd=( mysql --protocol=TCP -u${TEST_DB_USER} --port=${TEST_DB_PORT} ${TEST_DB_DATABASE} --password=${TEST_DB_PASSWORD})
+  for i in {15..0}; do
+    if echo 'SELECT 1' | "${mysqlCmd[@]}" &> /dev/null; then
+        break
+    fi
+    echo 'data server still not active'
+    sleep 5
+  done
+
+  if [ "$i" = 0 ]; then
+    if echo 'SELECT 1' | "${mysqlCmd[@]}" ; then
+        break
+    fi
+    if [ "$TYPE" != "mariadb" ] && [ "$LOCAL" != "1" ] ; then
+      docker-compose -f ${COMPOSE_FILE} logs
+      if [ "$TYPE" == "maxscale" ] ; then
+          docker-compose -f ${COMPOSE_FILE} exec maxscale tail -n 500 /var/log/maxscale/maxscale.log
+      fi
+    fi
+
+    echo >&2 'data server start process failed.'
+    exit 1
+  fi
+}
+
 # launch docker instances
 launch_docker () {
   export TEST_REQUIRE_TLS=0
   export ENTRYPOINT=$PROJ_PATH/travis/sql
   export ENTRYPOINT_PAM=$PROJ_PATH/travis/pam
-
   export COMPOSE_FILE=$PROJ_PATH/travis/docker-compose.yml
-
   export TEST_DB_HOST=mariadb.example.com
   export TEST_DB_PORT=3305
   export TEST_DB_USER=boby
   export TEST_DB_PASSWORD=heyPassw0@rd
-  echo "configuring mysql additional type"
-  sleep 1
 
-  if [[ "$TYPE" == mysql ]] ; then
-    if [[ "$VERSION" == 5.7 ]] ; then
+  if [ "$TYPE" == mysql ] ; then
+    echo "configuring mysql additional type"
+    if [ "$VERSION" == 5.7 ] ; then
       export ADDITIONAL_CONF="--sha256-password-public-key-path=/etc/sslcert/public.key --sha256-password-private-key-path=/etc/sslcert/server.key"
     else
       export ADDITIONAL_CONF="--caching-sha2-password-private-key-path=/etc/sslcert/server.key --caching-sha2-password-public-key-path=/etc/sslcert/public.key --sha256-password-public-key-path=/etc/sslcert/public.key --sha256-password-private-key-path=/etc/sslcert/server.key"
     fi
-    if [ -z "$NATIVE" ] || [[ "$NATIVE" == 1 ]] ; then
+    if [ -z "$NATIVE" ] || [ "$NATIVE" == 1 ] ; then
       export ADDITIONAL_CONF="--default-authentication-plugin=mysql_native_password $ADDITIONAL_CONF"
     fi
   fi
@@ -79,37 +150,15 @@ launch_docker () {
       fi
   fi
 
-  mysql=( mysql --protocol=TCP -u${TEST_DB_USER} -h${TEST_DB_HOST} --port=${TEST_DB_PORT} ${TEST_DB_DATABASE} --password=$TEST_DB_PASSWORD)
-
-
   # launch docker server and maxscale
   docker-compose -f ${COMPOSE_FILE} up -d
 
   # wait for docker initialisation
-  for i in {15..0}; do
-    if echo 'SELECT 1' | "${mysql[@]}" &> /dev/null; then
-        break
-    fi
-    echo 'data server still not active'
-    sleep 5
-  done
-
-  if [ "$i" = 0 ]; then
-    if echo 'SELECT 1' | "${mysql[@]}" ; then
-        break
-    fi
-
-    docker-compose -f ${COMPOSE_FILE} logs
-    if [ "$TYPE" == "maxscale" ] ; then
-        docker-compose -f ${COMPOSE_FILE} exec maxscale tail -n 500 /var/log/maxscale/maxscale.log
-    fi
-    echo >&2 'data server init process failed.'
-    exit 1
-  fi
+  check_server_status
 
   echo 'data server active !'
 
-  if [[ "$TYPE" == "mariadb" ]] ; then
+  if [ "$TYPE" == "mariadb" ] ; then
 
     export TEST_PAM_USER=testPam
     export TEST_PAM_PWD=myPwd
@@ -122,26 +171,7 @@ launch_docker () {
     docker-compose -f ${COMPOSE_FILE} start db
 
     # wait for restart
-    for i in {30..0}; do
-      if echo 'SELECT 1' | "${mysql[@]}" &> /dev/null; then
-          break
-      fi
-      echo 'data server restart still not active'
-      sleep 2
-    done
-
-    if [ "$i" = 0 ]; then
-      if echo 'SELECT 1' | "${mysql[@]}" ; then
-          break
-      fi
-
-      docker-compose -f ${COMPOSE_FILE} logs
-      if [ "$TYPE" == "maxscale" ] ; then
-          docker-compose -f ${COMPOSE_FILE} exec maxscale tail -n 500 /var/log/maxscale/maxscale.log
-      fi
-      echo >&2 'data server restart process failed.'
-      exit 1
-    fi
+    check_server_status
   fi
 }
 
@@ -155,12 +185,13 @@ launch_docker () {
 
 export PROJ_PATH="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 DEBUG=false
-while getopts ":t:v:d:n:debug:" flag; do
+while getopts ":t:v:d:n:l:debug:" flag; do
     case "${flag}" in
         t) TYPE=${OPTARG};;
         v) VERSION=${OPTARG};;
         d) DATABASE=${OPTARG};;
         n) NATIVE=("1" == ${OPTARG});;
+        l) LOCAL=("1" == ${OPTARG});;
         debug) DEBUG=("1" == ${OPTARG});;
     esac
 done
@@ -170,6 +201,7 @@ echo "VERSION: $VERSION"
 echo "DATABASE: $DATABASE"
 echo "DEBUG: $DEBUG"
 echo "NATIVE: $NATIVE"
+echo "LOCAL: $LOCAL"
 echo "PROJ_PATH: $PROJ_PATH"
 
 export TEST_DB_DATABASE=$DATABASE
@@ -207,9 +239,15 @@ case $TYPE in
           echo "database must be provided for $TYPE"
           exit 31
         fi
+
         generate_ssl
         echo "ssl files configured"
-        launch_docker
+
+        if [ "$TYPE" == "mariadb" ] && [ "$LOCAL" == "1" ] ; then
+          install_local
+        else
+          launch_docker
+        fi
         ;;
 
     mariadb-es)
