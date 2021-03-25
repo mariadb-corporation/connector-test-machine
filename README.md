@@ -11,7 +11,7 @@ git-crypt unlock /path/to/testing_machine_key.txt
 
 ```
 git clone https://github.com/rusher/connector-test-machine.git
-source connector-test-machine/launch.sh -tTYPE -vVERSION -dDATABASE -nNATIVE
+source connector-test-machine/launch.sh -tTYPE -vVERSION -dDATABASE -nNATIVE -pPACKET_SIZE -lLOCAL
 ```
 
 possible TYPE value : 
@@ -26,7 +26,11 @@ possible TYPE value :
 
 version is mandatory for non skysql env.
 
-NATIVE permits to indicate if MySQL must use 'mysql_native_password' as default authentication plugin. Possible value "1" or "0". Default value "1".
+Optional options : 
+* PACKET_SIZE permitting to set max_allowed_packet in mb (default 20 if not set)
+* LOCAL permit to install MariaDB server locally (not using docker, permitting unix socket testing)
+* NATIVE permits to indicate if MySQL must use 'mysql_native_password' as default authentication plugin. Possible value "1" or "0". Default value "1".
+
 
 environment key CONNECTOR_TEST_SECRET_KEY must be set for skysql and enterprise. 
 

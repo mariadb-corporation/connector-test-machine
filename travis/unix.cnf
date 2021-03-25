@@ -1,9 +1,8 @@
 [mysqld]
 max_connections=500
-max_allowed_packet=20M
-innodb_log_file_size=200M
 character_set_server=utf8mb4
 collation_server=utf8mb4_unicode_ci
 ssl_ca=/etc/ssl/mariadb/ca.crt
 ssl_cert=/etc/ssl/mariadb/server.crt
 ssl_key=/etc/ssl/mariadb/server.key
+

@@ -75,6 +75,9 @@ install_local () {
 
     # configuration addition (ssl mostly)
     sudo cp $PROJ_PATH/travis/unix.cnf /etc/mysql/conf.d/unix.cnf
+    sudo echo 'max_allowed_packet=${PACKET_SIZE}M' >> /etc/mysql/conf.d/unix.cnf
+    sudo echo 'innodb_log_file_size=${PACKET_SIZE}0M' >> /etc/mysql/conf.d/unix.cnf
+
     sudo ls -lrt /etc/mysql/conf.d/
     sudo chmod +xr /etc/mysql/conf.d/unix.cnf
     tail /etc/mysql/conf.d/unix.cnf
@@ -189,13 +192,15 @@ launch_docker () {
 export PROJ_PATH="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 echo "parsing parameters"
 
-while getopts ":t:v:d:n:l:debug:" flag; do
+PACKET_SIZE=20
+while getopts ":t:v:d:n:l:p:debug:" flag; do
     case "${flag}" in
         t) TYPE=${OPTARG};;
         v) VERSION=${OPTARG};;
         d) DATABASE=${OPTARG};;
         n) NATIVE=${OPTARG};;
         l) LOCAL=${OPTARG};;
+        p) PACKET_SIZE=${OPTARG};;
         debug) DEBUG=${OPTARG};;
     esac
 done
@@ -208,6 +213,7 @@ echo "DEBUG: ${DEBUG}"
 echo "NATIVE: ${NATIVE}"
 echo "LOCAL: ${LOCAL}"
 echo "PROJ_PATH: ${PROJ_PATH}"
+echo "PACKET_SIZE: ${PACKET_SIZE}"
 
 export TEST_DB_DATABASE=$DATABASE
 export TYPE_VERS=$"$TYPE:$VERSION"

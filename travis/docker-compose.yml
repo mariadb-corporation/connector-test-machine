@@ -2,7 +2,7 @@ version: '2.1'
 services:
   db:
     image: $TYPE_VERS
-    command: --max-connections=500 --max-allowed-packet=20M --innodb-log-file-size=200M --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci --ssl-ca=/etc/sslcert/ca.crt --ssl-cert=/etc/sslcert/server.crt --ssl-key=/etc/sslcert/server.key --bind-address=0.0.0.0 --performance-schema=ON $ADDITIONAL_CONF
+    command: --max-connections=500 --max-allowed-packet=${PACKET_SIZE}M --innodb-log-file-size=${PACKET_SIZE}0M --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci --ssl-ca=/etc/sslcert/ca.crt --ssl-cert=/etc/sslcert/server.crt --ssl-key=/etc/sslcert/server.key --bind-address=0.0.0.0 --performance-schema=ON $ADDITIONAL_CONF
     ports:
       - 3305:3306
     volumes:
