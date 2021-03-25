@@ -205,6 +205,16 @@ while getopts ":t:v:d:n:l:p:debug:" flag; do
     esac
 done
 
+if [ -z "$PACKET_SIZE" ] ; then
+  PACKET_SIZE=20
+else
+  re='^[0-9]+$'
+  if ! [[ $PACKET_SIZE =~ $re ]] ; then
+   echo "error: Packet size is not a number" >&2; exit 1
+  fi
+fi
+
+
 echo "parameters:"
 echo "TYPE: ${TYPE}"
 echo "VERSION: ${VERSION}"
