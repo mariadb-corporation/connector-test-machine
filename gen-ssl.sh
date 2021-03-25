@@ -126,7 +126,6 @@ main() {
   rm "$tmpKeystoreFile"
 
   log "Generated key file and certificate in: ${sslDir}"
-  ls -l "${sslDir}"
 }
 
 main "$@"

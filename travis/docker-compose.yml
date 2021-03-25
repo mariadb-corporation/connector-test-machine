@@ -6,7 +6,7 @@ services:
     ports:
       - 3305:3306
     volumes:
-      - /tmp/ssl:/etc/sslcert
+      - /etc/ssl/mariadb:/etc/sslcert
       - $ENTRYPOINT:/docker-entrypoint-initdb.d
       - $ENTRYPOINT:/es-initdb.d
       - $ENTRYPOINT_PAM:/pam

@@ -8,17 +8,21 @@ set -eo pipefail
 
 # generate ssl for server and client
 generate_ssl () {
-  mkdir /tmp/ssl
-  /bin/bash $PROJ_PATH/gen-ssl.sh mariadb.example.com /tmp/ssl
-  cat /tmp/ssl/ca.crt /tmp/ssl/server.crt > /tmp/ssl/ca_server.crt
-  export TEST_DB_SERVER_CERT=/tmp/ssl/ca_server.crt
-  export TEST_DB_SERVER_CERT_STRING=$(cat /tmp/ssl/ca_server.crt)
-  export TEST_DB_RSA_PUBLIC_KEY=/tmp/ssl/public.key
-  #export TEST_DB_SERVER_CA_CERT=/tmp/ssl/ca.crt
-  #export TEST_DB_SERVER_INTERMEDIATE_CERT=/tmp/ssl/server.crt
-  export TEST_DB_CLIENT_KEY=/tmp/ssl/client.key
-  export TEST_DB_CLIENT_CERT=/tmp/ssl/client.crt
-  export TEST_DB_CLIENT_PKCS=/tmp/ssl/fullclient-keystore.p12
+  ls -lrt /etc/ssl
+  sudo mkdir /etc/ssl/mariadb
+  sudo /bin/bash $PROJ_PATH/gen-ssl.sh mariadb.example.com /etc/ssl/mariadb
+  sudo sh -c 'cat /etc/ssl/mariadb/ca.crt /etc/ssl/mariadb/server.crt > /etc/ssl/mariadb/ca_server.crt'
+  export TEST_DB_SERVER_CERT=/etc/ssl/mariadb/ca_server.crt
+  export TEST_DB_SERVER_CERT_STRING=$(cat /etc/ssl/mariadb/ca_server.crt)
+  export TEST_DB_RSA_PUBLIC_KEY=/etc/ssl/mariadb/public.key
+  #export TEST_DB_SERVER_CA_CERT=/etc/ssl/mariadb/ca.crt
+  #export TEST_DB_SERVER_INTERMEDIATE_CERT=/etc/ssl/mariadb/server.crt
+  export TEST_DB_CLIENT_KEY=/etc/ssl/mariadb/client.key
+  export TEST_DB_CLIENT_CERT=/etc/ssl/mariadb/client.crt
+  export TEST_DB_CLIENT_PKCS=/etc/ssl/mariadb/fullclient-keystore.p12
+  sudo chmod +r /etc/ssl/mariadb/*
+  sudo chown -Rv mysql:root /etc/ssl/mariadb
+  ls -lrt /etc/ssl/mariadb
 }
 
 # decrypt
@@ -76,7 +80,6 @@ install_local () {
     tail /etc/mysql/conf.d/unix.cnf
 
     echo "restart mariadb server"
-
     sudo service mariadb restart
 
     # wait for initialisation
@@ -184,25 +187,27 @@ launch_docker () {
 
 
 export PROJ_PATH="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
-DEBUG=false
+echo "parsing parameters"
+
 while getopts ":t:v:d:n:l:debug:" flag; do
     case "${flag}" in
         t) TYPE=${OPTARG};;
         v) VERSION=${OPTARG};;
         d) DATABASE=${OPTARG};;
-        n) NATIVE=("1" == ${OPTARG});;
-        l) LOCAL=("1" == ${OPTARG});;
-        debug) DEBUG=("1" == ${OPTARG});;
+        n) NATIVE=${OPTARG};;
+        l) LOCAL=${OPTARG};;
+        debug) DEBUG=${OPTARG};;
     esac
 done
 
-echo "TYPE: $TYPE"
-echo "VERSION: $VERSION"
-echo "DATABASE: $DATABASE"
-echo "DEBUG: $DEBUG"
-echo "NATIVE: $NATIVE"
-echo "LOCAL: $LOCAL"
-echo "PROJ_PATH: $PROJ_PATH"
+echo "parameters:"
+echo "TYPE: ${TYPE}"
+echo "VERSION: ${VERSION}"
+echo "DATABASE: ${DATABASE}"
+echo "DEBUG: ${DEBUG}"
+echo "NATIVE: ${NATIVE}"
+echo "LOCAL: ${LOCAL}"
+echo "PROJ_PATH: ${PROJ_PATH}"
 
 export TEST_DB_DATABASE=$DATABASE
 export TYPE_VERS=$"$TYPE:$VERSION"
@@ -214,7 +219,7 @@ case $TYPE in
           exit 10
         fi
         decrypt
-        if [ "$DEBUG" = true ] ; then
+        if [ "$DEBUG" == "1" ] ; then
           source $PROJ_PATH/secretdir/${TYPE}.sh
         else
           source $PROJ_PATH/secretdir/${TYPE}.sh > /dev/null
@@ -283,7 +288,7 @@ case $TYPE in
           exit 50
         fi
         /bin/bash $PROJ_PATH/travis/build/build.sh
-        if [ "$DEBUG" = true ] ; then
+        if [ "$DEBUG" == "1" ] ; then
           docker build -t build:10.6 --label build $PROJ_PATH/travis/build
         else
           docker build -t build:10.6 --label build $PROJ_PATH/travis/build > /dev/null

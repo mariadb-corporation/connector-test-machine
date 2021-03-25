@@ -6,7 +6,7 @@ services:
     ports:
       - 3305:3306
     volumes:
-      - /tmp/ssl:/etc/sslcert
+      - /etc/ssl/mariadb:/etc/sslcert
       - $ENTRYPOINT:/docker-entrypoint-initdb.d
       - $ENTRYPOINT_PAM:/pam
     environment:
@@ -28,7 +28,7 @@ services:
       - 4008:4008
       - 4009:4009
     volumes:
-      - /tmp/ssl:/etc/sslcert
+      - /etc/ssl/mariadb:/etc/sslcert
     build:
       context: .
       dockerfile: maxscale/Dockerfile
