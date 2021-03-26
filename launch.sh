@@ -75,8 +75,8 @@ install_local () {
 
     # configuration addition (ssl mostly)
     sudo cp $PROJ_PATH/travis/unix.cnf /etc/mysql/conf.d/unix.cnf
-    sudo echo 'max_allowed_packet=${PACKET_SIZE}M' >> /etc/mysql/conf.d/unix.cnf
-    sudo echo 'innodb_log_file_size=${PACKET_SIZE}0M' >> /etc/mysql/conf.d/unix.cnf
+    sudo sh -c "echo 'max_allowed_packet=${PACKET_SIZE}M' >> /etc/mysql/conf.d/unix.cnf"
+    sudo sh -c "echo 'innodb_log_file_size=${PACKET_SIZE}0M' >> /etc/mysql/conf.d/unix.cnf"
 
     sudo ls -lrt /etc/mysql/conf.d/
     sudo chmod +xr /etc/mysql/conf.d/unix.cnf
@@ -127,6 +127,8 @@ launch_docker () {
   export TEST_DB_PORT=3305
   export TEST_DB_USER=boby
   export TEST_DB_PASSWORD=heyPassw0@rd
+  export PACKET_SIZE_VAL="${PACKET_SIZE}M"
+  export INNODB_LOG_FILE_SIZE="${PACKET_SIZE}0M"
 
   if [ "$TYPE" == mysql ] ; then
     echo "configuring mysql additional type"
