@@ -230,6 +230,10 @@ echo "PACKET_SIZE: ${PACKET_SIZE}"
 export TEST_DB_DATABASE=$DATABASE
 export TYPE_VERS=$"$TYPE:$VERSION"
 
+echo '{"ipv6":true,"fixed-cidr-v6":"2001:db8:1::/64"}' | sudo tee /etc/docker/daemon.json
+sudo service docker restart
+export TEST_DB_HOST_IPV6=2001:db8:1::/64
+
 case $TYPE in
     skysql|skysql-ha)
         if [ -z "$CONNECTOR_TEST_SECRET_KEY" ] ; then
