@@ -25,6 +25,13 @@ generate_ssl () {
   ls -lrt /etc/ssl/mariadb
 }
 
+docker_login () {
+  decrypt
+  mapfile DOCKER_PWD < $PROJ_PATH/secretdir/docker-pwd.txt
+  docker login --username mariadbtest --password $DOCKER_PWD
+  DOCKER_PWD=removed
+}
+
 # decrypt
 decrypt () {
   sudo apt-get update > /dev/null 2>&1
@@ -141,8 +148,8 @@ launch_docker () {
       export ADDITIONAL_CONF="--default-authentication-plugin=mysql_native_password $ADDITIONAL_CONF"
     fi
   fi
-
   echo "ending configuring mysql additional type"
+
   sleep 1
   if [ "$TYPE" == "maxscale" ] ; then
       # maxscale ports:
@@ -254,6 +261,7 @@ case $TYPE in
           exit 20
         fi
         generate_ssl
+        docker_login
         launch_docker
         ;;
 
@@ -273,6 +281,7 @@ case $TYPE in
         if [ "$TYPE" == "mariadb" ] && [ "$LOCAL" == "1" ] ; then
           install_local
         else
+          docker_login
           launch_docker
         fi
         ;;
@@ -291,7 +300,7 @@ case $TYPE in
           exit 41
         fi
 
-        decrypt
+        docker_login
 
         mapfile ES_TOKEN < $PROJ_PATH/secretdir/mariadb-es-token.txt
         # change to https://github.com/mariadb-corporation/MariaDB-ES-Docker
@@ -309,6 +318,8 @@ case $TYPE in
           echo "database must be provided for $TYPE"
           exit 50
         fi
+        docker_login
+
         /bin/bash $PROJ_PATH/travis/build/build.sh
         if [ "$DEBUG" == "1" ] ; then
           docker build -t build:10.6 --label build $PROJ_PATH/travis/build
