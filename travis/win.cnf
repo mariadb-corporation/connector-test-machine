@@ -4,4 +4,5 @@ max_allowed_packet=20M
 innodb_log_file_size=200M
 character_set_server=utf8mb4
 collation_server=utf8mb4_unicode_ci
-named_pipe=1
+enable-named-pipe
+socket=namedpipe

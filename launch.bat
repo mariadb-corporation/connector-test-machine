@@ -40,12 +40,17 @@ if "%d%"=="" (
 
 choco install curl
 
-cp connector-test-machine/travis/win.cnf C:/my.cnf
-dir c:\
 
 call connector-test-machine/travis/windows-download.bat %v%
 msiexec /i server.msi INSTALLDIR=c:\projects\server SERVICENAME=mariadb ALLOWREMOTEROOTACCESS=true /qn
 c:\projects\server\bin\mysql.exe -e "create database %d%" --user=root
+
+dir .
+
+type connector-test-machine\travis\win.cnf >> c:\projects\server\data\my.ini
+type c:\projects\server\data\my.ini
+
+net stop mariadb && net start mariadb
 
 set TEST_DB_USER=root
 set TEST_DB_HOST=localhost
