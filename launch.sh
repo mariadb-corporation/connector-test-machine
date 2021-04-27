@@ -9,7 +9,7 @@ set -eo pipefail
 # generate ssl for server and client
 generate_ssl () {
   ls -lrt /etc/ssl
-  sudo mkdir /etc/ssl/mariadb
+  sudo mkdir -p /etc/ssl/mariadb
   sudo /bin/bash $PROJ_PATH/gen-ssl.sh mariadb.example.com /etc/ssl/mariadb
   sudo sh -c 'cat /etc/ssl/mariadb/ca.crt /etc/ssl/mariadb/server.crt > /etc/ssl/mariadb/ca_server.crt'
   export TEST_DB_SERVER_CERT=/etc/ssl/mariadb/ca_server.crt
