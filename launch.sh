@@ -50,12 +50,24 @@ decrypt () {
   rm /tmp/key.hex
 }
 
+remove_mysql () {
+  sudo apt-get remove --purge mysql-server mysql-client mysql-common
+  sudo apt-get autoremove
+  sudo apt-get autoclean
+  sudo deluser mysql
+  sudo rm -rf /var/lib/mysql
+  sudo apt-get purge mysql-server-*
+  sudo apt-get purge mysql-client-*
+  sudo rm -rf /var/log/mysql
+  sudo rm -rf /etc/mysql
+}
+
 # install local mariadb
 install_local () {
   echo "install local version"
   if [ "$TRAVIS_OS_NAME" == "linux" ] ; then
-    sudo apt-get purge mysql* mariadb*
-    sudo rm -rf /etc/mysql && sudo rm -rf /var/log/mysql && sudo rm -rf /var/lib/mysql && sudo rm -rf /var/lib/mysql-files && sudo rm -rf /var/lib/mysql-keyring
+    # remove mysql if present
+    remove_mysql
 
     sudo apt-get install software-properties-common
     sudo apt-key adv --fetch-keys 'https://mariadb.org/mariadb_release_signing_key.asc'
