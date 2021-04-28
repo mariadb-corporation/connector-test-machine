@@ -26,10 +26,12 @@ generate_ssl () {
 }
 
 docker_login () {
-  decrypt
-  mapfile DOCKER_PWD < $PROJ_PATH/secretdir/docker-pwd.txt
-  docker login --username mariadbtest --password $DOCKER_PWD
-  DOCKER_PWD=removed
+  if [ -n "$CONNECTOR_TEST_SECRET_KEY" ] ; then
+    decrypt
+    mapfile DOCKER_PWD < $PROJ_PATH/secretdir/docker-pwd.txt
+    docker login --username mariadbtest --password $DOCKER_PWD
+    DOCKER_PWD=removed
+  fi
 }
 
 # decrypt
