@@ -1,6 +1,6 @@
 #!/bin/bash
 
-set -eo pipefail
+set -o pipefail
 
 ############################################################################
 ##############################" functions ##################################
@@ -159,7 +159,7 @@ launch_docker () {
       export TEST_DB_PORT=4006
       export TEST_MAXSCALE_TLS_PORT=4009
       export COMPOSE_FILE=$PROJ_PATH/travis/maxscale-compose.yml
-      if [ "$DEBUG" = true ] ; then
+      if [ "$DEBUG" = "1" ] ; then
         docker-compose -f ${COMPOSE_FILE} build
       else
         docker-compose -f ${COMPOSE_FILE} build > /dev/null
@@ -224,6 +224,17 @@ else
   fi
 fi
 
+if [ -z "$NATIVE" ] ; then
+  NATIVE=1
+fi
+
+if [ -z "LOCAL" ] ; then
+  LOCAL=0
+fi
+
+if [ -z "DEBUG" ] ; then
+  DEBUG=0
+fi
 
 echo "parameters:"
 echo "TYPE: ${TYPE}"
@@ -234,6 +245,11 @@ echo "NATIVE: ${NATIVE}"
 echo "LOCAL: ${LOCAL}"
 echo "PROJ_PATH: ${PROJ_PATH}"
 echo "PACKET_SIZE: ${PACKET_SIZE}"
+if [ -z "$CONNECTOR_TEST_SECRET_KEY" ] ; then
+  echo "CONNECTOR_TEST_SECRET_KEY env not set"
+else
+  echo "CONNECTOR_TEST_SECRET_KEY env set"
+fi
 
 export TEST_DB_DATABASE=$DATABASE
 export TYPE_VERS=$"$TYPE:$VERSION"
