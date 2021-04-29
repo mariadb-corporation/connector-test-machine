@@ -152,6 +152,8 @@ launch_docker () {
 
   if [ "$TYPE" == mysql ] ; then
     echo "configuring mysql additional type"
+
+    export ADDITIONAL_CONF="--local-infile=ON $ADDITIONAL_CONF"
     if [ "$VERSION" == 5.7 ] ; then
       export ADDITIONAL_CONF="--sha256-password-public-key-path=/etc/sslcert/public.key --sha256-password-private-key-path=/etc/sslcert/server.key"
     else

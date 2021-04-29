@@ -5,4 +5,4 @@ collation_server=utf8mb4_unicode_ci
 ssl_ca=/etc/ssl/mariadb/ca.crt
 ssl_cert=/etc/ssl/mariadb/server.crt
 ssl_key=/etc/ssl/mariadb/server.key
-
+local_infile=1
