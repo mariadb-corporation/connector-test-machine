@@ -73,19 +73,19 @@ install_local () {
     sudo apt-key adv --fetch-keys 'https://mariadb.org/mariadb_release_signing_key.asc'
     sudo add-apt-repository "deb [arch=amd64,arm64,ppc64el] http://ftp.igh.cnrs.fr/pub/mariadb/repo/${VERSION}/ubuntu ${TRAVIS_DIST} main"
     sudo apt update
-    echo "mariadb-server-${VERSION} mysql-server/root_password password heyPassw0@rd" | sudo debconf-set-selections
-    echo "mariadb-server-${VERSION} mysql-server/root_password_again password heyPassw0@rd" | sudo debconf-set-selections
+    echo "mariadb-server-${VERSION} mysql-server/root_password password heyPassw0-rd" | sudo debconf-set-selections
+    echo "mariadb-server-${VERSION} mysql-server/root_password_again password heyPassw0-rd" | sudo debconf-set-selections
     sudo apt-get -y install mariadb-server
     export TEST_DB_HOST=mariadb.example.com
     export TEST_DB_PORT=3306
     export TEST_DB_USER=boby
-    export TEST_DB_PASSWORD=heyPassw0@rd
+    export TEST_DB_PASSWORD=heyPassw0-rd
     export TEST_REQUIRE_TLS=0
 
     echo "adding database and user"
     if [ $VERSION == "10.2" ] || [ $VERSION == "10.3" ] ; then
-      mysql -uroot --password=heyPassw0@rd -e "create DATABASE IF NOT EXISTS ${TEST_DB_DATABASE}"
-      mysql -uroot --password=heyPassw0@rd ${TEST_DB_DATABASE} < $PROJ_PATH/travis/sql/dbinit.sql
+      mysql -uroot --password=heyPassw0-rd -e "create DATABASE IF NOT EXISTS ${TEST_DB_DATABASE}"
+      mysql -uroot --password=heyPassw0-rd ${TEST_DB_DATABASE} < $PROJ_PATH/travis/sql/dbinit.sql
     else
       sudo mysql -e "create DATABASE IF NOT EXISTS ${TEST_DB_DATABASE}"
       sudo mysql ${TEST_DB_DATABASE} < $PROJ_PATH/travis/sql/dbinit.sql
@@ -146,7 +146,7 @@ launch_docker () {
   export TEST_DB_HOST=mariadb.example.com
   export TEST_DB_PORT=3305
   export TEST_DB_USER=boby
-  export TEST_DB_PASSWORD=heyPassw0@rd
+  export TEST_DB_PASSWORD=heyPassw0-rd
   export PACKET_SIZE_VAL="${PACKET_SIZE}M"
   export INNODB_LOG_FILE_SIZE="${PACKET_SIZE}0M"
 

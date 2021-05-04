@@ -9,7 +9,7 @@ sleep 15
 #################################################################################################
 # wait for db availability for 60s
 #################################################################################################
-mysql=( mysql --protocol=tcp -uboby -hdb --password=heyPassw0@rd --port=3306 )
+mysql=( mysql --protocol=tcp -uboby -hdb --password=heyPassw0-rd --port=3306 )
 
 for i in {60..0}; do
     if echo 'use test2' | "${mysql[@]}" &> /dev/null; then

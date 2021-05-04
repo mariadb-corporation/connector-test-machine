@@ -12,12 +12,12 @@ services:
       - $ENTRYPOINT_PAM:/pam
     environment:
       MARIADB_USER: boby
-      MARIADB_PASSWORD: heyPassw0@rd
+      MARIADB_PASSWORD: heyPassw0-rd
       MARIADB_DATABASE: $TEST_DB_DATABASE
       MYSQL_DATABASE: $TEST_DB_DATABASE
       MYSQL_ALLOW_EMPTY_PASSWORD: 1
       MARIADB_ALLOW_EMPTY_PASSWORD: 1
     healthcheck:
-      test: ["CMD", "mysql", "--protocol=tcp", "-uboby", "-h127.0.0.1", "--password=heyPassw0@rd"]
+      test: ["CMD", "mysql", "--protocol=tcp", "-uboby", "-h127.0.0.1", "--password=heyPassw0-rd"]
       timeout: 20s
       retries: 10
