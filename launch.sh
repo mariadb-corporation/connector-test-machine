@@ -15,8 +15,8 @@ generate_ssl () {
   export TEST_DB_SERVER_CERT=/etc/ssl/mariadb/ca_server.crt
   export TEST_DB_SERVER_CERT_STRING=$(cat /etc/ssl/mariadb/ca_server.crt)
   export TEST_DB_RSA_PUBLIC_KEY=/etc/ssl/mariadb/public.key
-  #export TEST_DB_SERVER_CA_CERT=/etc/ssl/mariadb/ca.crt
-  #export TEST_DB_SERVER_INTERMEDIATE_CERT=/etc/ssl/mariadb/server.crt
+  export TEST_DB_SERVER_CA_CERT=/etc/ssl/mariadb/ca.crt
+  export TEST_DB_SERVER_INTERMEDIATE_CERT=/etc/ssl/mariadb/server.crt
   export TEST_DB_CLIENT_KEY=/etc/ssl/mariadb/client.key
   export TEST_DB_CLIENT_CERT=/etc/ssl/mariadb/client.crt
   export TEST_DB_CLIENT_PKCS=/etc/ssl/mariadb/fullclient-keystore.p12
