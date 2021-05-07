@@ -79,8 +79,8 @@ install_osx () {
 
   export TEST_DB_HOST=mariadb.example.com
   export TEST_DB_PORT=3306
-  export TEST_DB_USER=root
-  export TEST_DB_PASSWORD=
+  export TEST_DB_USER=boby
+  export TEST_DB_PASSWORD=heyPassw0-rd
   export TEST_REQUIRE_TLS=0
 
   echo "adding database and user"
@@ -92,7 +92,7 @@ install_osx () {
 # install local mariadb
 install_local () {
   echo "install local version"
-  if [ "$TRAVIS_OS_NAME" == "linux"]  ; then
+  if [ "$TRAVIS_OS_NAME" == "linux" ]  ; then
     # remove mysql if present
     remove_mysql
 
