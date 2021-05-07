@@ -62,10 +62,37 @@ remove_mysql () {
   sudo rm -rf /etc/mysql
 }
 
+install_osx () {
+
+  echo 'brew install mariadb !'
+  brew install mariadb
+  # configuration addition (ssl mostly)
+  sudo cp $PROJ_PATH/travis/unix.cnf /etc/mysql/conf.d/unix.cnf
+  sudo sh -c "echo 'max_allowed_packet=${PACKET_SIZE}M' >> /etc/mysql/conf.d/unix.cnf"
+  sudo sh -c "echo 'innodb_log_file_size=${PACKET_SIZE}0M' >> /etc/mysql/conf.d/unix.cnf"
+
+  sudo ls -lrt /etc/mysql/conf.d/
+  sudo chmod +xr /etc/mysql/conf.d/unix.cnf
+  tail /etc/mysql/conf.d/unix.cnf
+
+  mysql.server start
+
+  export TEST_DB_HOST=mariadb.example.com
+  export TEST_DB_PORT=3306
+  export TEST_DB_USER=root
+  export TEST_DB_PASSWORD=
+  export TEST_REQUIRE_TLS=0
+
+  echo "adding database and user"
+  sudo mysql -e "create DATABASE IF NOT EXISTS ${TEST_DB_DATABASE}"
+  sudo mysql ${TEST_DB_DATABASE} < $PROJ_PATH/travis/sql/dbinit.sql
+  echo "adding database and user done"
+}
+
 # install local mariadb
 install_local () {
   echo "install local version"
-  if [ "$TRAVIS_OS_NAME" == "linux" ] ; then
+  if [ "$TRAVIS_OS_NAME" == "linux"]  ; then
     # remove mysql if present
     remove_mysql
 
@@ -308,12 +335,15 @@ case $TYPE in
 
         generate_ssl
         echo "ssl files configured"
-
-        if [ "$TYPE" == "mariadb" ] && [ "$LOCAL" == "1" ] ; then
-          install_local
+        if [ "$TRAVIS_OS_NAME" == "osx" ] ; then
+          install_osx
         else
-          docker_login
-          launch_docker
+          if [ "$TYPE" == "mariadb" ] && [ "$LOCAL" == "1" ] ; then
+            install_local
+          else
+            docker_login
+            launch_docker
+          fi
         fi
         ;;
 
