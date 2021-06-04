@@ -200,11 +200,15 @@ launch_docker () {
       export TEST_DB_PORT=4006
       export TEST_MAXSCALE_TLS_PORT=4009
       export COMPOSE_FILE=$PROJ_PATH/travis/maxscale-compose.yml
-      if [ "$DEBUG" = "1" ] ; then
-        docker-compose -f ${COMPOSE_FILE} build
-      else
-        docker-compose -f ${COMPOSE_FILE} build > /dev/null
+      if [ -z "$VERSION" ] ; then
+        export VERSION=2.5.12
       fi
+      echo "building maxscale version $VERSION"
+      #if [ "$DEBUG" = "1" ] ; then
+      docker-compose -f ${COMPOSE_FILE} build
+      #else
+      #  docker-compose -f ${COMPOSE_FILE} build > /dev/null
+      #fi
   fi
 
   # launch docker server and maxscale
@@ -244,7 +248,7 @@ export PROJ_PATH="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pw
 echo "parsing parameters"
 
 PACKET_SIZE=20
-while getopts ":t:v:d:n:l:p:debug:" flag; do
+while getopts ":t:v:d:n:l:p:g:" flag; do
     case "${flag}" in
         t) TYPE=${OPTARG};;
         v) VERSION=${OPTARG};;
@@ -252,7 +256,7 @@ while getopts ":t:v:d:n:l:p:debug:" flag; do
         n) NATIVE=${OPTARG};;
         l) LOCAL=${OPTARG};;
         p) PACKET_SIZE=${OPTARG};;
-        debug) DEBUG=${OPTARG};;
+        g) DEBUG=${OPTARG};;
     esac
 done
 
