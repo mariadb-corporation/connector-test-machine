@@ -1,6 +1,6 @@
 
 # vim:set ft=dockerfile:
-FROM ubuntu:xenial
+FROM ubuntu:focal
 # add our user and group first to make sure their IDs get assigned consistently, regardless of whatever dependencies get added
 RUN groupadd -r mysql && useradd -r -g mysql mysql
 
@@ -65,10 +65,10 @@ RUN apt-get update -y
 RUN apt-get install -y software-properties-common wget
 RUN apt-key adv --recv-keys --keyserver keyserver.ubuntu.com 0xcbcb082a1bb943db
 RUN apt-key adv --recv-keys --keyserver ha.pool.sks-keyservers.net F1656F24C74CD1D8
-RUN echo 'deb http://yum.mariadb.org/galera/repo4/deb xenial main' > /etc/apt/sources.list.d/galera-test-repo.list
+RUN echo 'deb http://yum.mariadb.org/galera/repo4/deb focal main' > /etc/apt/sources.list.d/galera-test-repo.list
 RUN apt-get update -y
 
-RUN apt-get install -y curl libdbi-perl rsync socat libnuma1 libaio1 zlib1g-dev libreadline5 libjemalloc1 libsnappy1v5 libcrack2 apt-utils
+RUN apt-get install -y curl libdbi-perl rsync socat libnuma1 libaio1 zlib1g-dev libreadline5 libjemalloc2 libsnappy1v5 libcrack2 apt-utils
 
 RUN apt-get install -y galera4
 
