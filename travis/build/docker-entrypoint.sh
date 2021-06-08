@@ -81,10 +81,11 @@ docker_process_init_files() {
 					. "$f"
 				fi
 				;;
-			*.sql)    mysql_note "$0: running $f"; docker_process_sql < "$f"; echo ;;
-			*.sql.gz) mysql_note "$0: running $f"; gunzip -c "$f" | docker_process_sql; echo ;;
-			*.sql.xz) mysql_note "$0: running $f"; xzcat "$f" | docker_process_sql; echo ;;
-			*)        mysql_warn "$0: ignoring $f" ;;
+			*.sql)     mysql_note "$0: running $f"; docker_process_sql < "$f"; echo ;;
+			*.sql.gz)  mysql_note "$0: running $f"; gunzip -c "$f" | docker_process_sql; echo ;;
+			*.sql.xz)  mysql_note "$0: running $f"; xzcat "$f" | docker_process_sql; echo ;;
+			*.sql.zst) mysql_note "$0: running $f"; zstd -dc "$f" | docker_process_sql; echo ;;
+			*)         mysql_warn "$0: ignoring $f" ;;
 		esac
 		echo
 	done
@@ -94,7 +95,6 @@ docker_process_init_files() {
 _verboseHelpArgs=(
 	--verbose --help
 	--log-bin-index="$(mktemp -u)" # https://github.com/docker-library/mysql/issues/136
-	--encrypt-tmp-files=0 # https://github.com/docker-library/mariadb/issues/339
 )
 
 mysql_check_config() {
@@ -116,16 +116,16 @@ mysql_get_config() {
 
 # Do a temporary startup of the MariaDB server, for init purposes
 docker_temp_server_start() {
-	"$@" --skip-networking --socket="${SOCKET}" &
+	"$@" --skip-networking --socket="${SOCKET}" --wsrep_on=OFF &
 	mysql_note "Waiting for server startup"
+	# only use the root password if the database has already been initializaed
+	# so that it won't try to fill in a password file when it hasn't been set yet
+	extraArgs=()
+	if [ -z "$DATABASE_ALREADY_EXISTS" ]; then
+		extraArgs+=( '--dont-use-mysql-root-password' )
+	fi
 	local i
 	for i in {30..0}; do
-		# only use the root password if the database has already been initializaed
-		# so that it won't try to fill in a password file when it hasn't been set yet
-		extraArgs=()
-		if [ -z "$DATABASE_ALREADY_EXISTS" ]; then
-			extraArgs+=( '--dont-use-mysql-root-password' )
-		fi
 		if docker_process_sql "${extraArgs[@]}" --database=mysql <<<'SELECT 1' &> /dev/null; then
 			break
 		fi
@@ -139,11 +139,9 @@ docker_temp_server_start() {
 # Stop the server. When using a local socket file mysqladmin will block until
 # the shutdown is complete.
 docker_temp_server_stop() {
-	export MYSQL_PWD=$MARIADB_ROOT_PASSWORD
-	if ! mysqladmin shutdown -uroot --socket="${SOCKET}"; then
+	if ! MYSQL_PWD=$MARIADB_ROOT_PASSWORD mysqladmin shutdown -uroot --socket="${SOCKET}"; then
 		mysql_error "Unable to shut down server."
 	fi
-	unset MYSQL_PWD
 }
 
 # Verify that the minimally required password settings are set for new databases.
@@ -165,6 +163,8 @@ docker_create_db_directories() {
 	if [ "$user" = "0" ]; then
 		# this will cause less disk access than `chown -R`
 		find "$DATADIR" \! -user mysql -exec chown mysql '{}' +
+		# See https://github.com/MariaDB/mariadb-docker/issues/363
+		find "${SOCKET%/*}" -maxdepth 0 \! -user mysql -exec chown mysql '{}' \;
 	fi
 }
 
@@ -211,6 +211,15 @@ docker_setup_env() {
 	fi
 }
 
+# Execute the client, use via docker_process_sql to handle root password
+docker_exec_client() {
+	# args sent in can override this db, since they will be later in the command
+	if [ -n "$MYSQL_DATABASE" ]; then
+		set -- --database="$MYSQL_DATABASE" "$@"
+	fi
+	mysql --protocol=socket -uroot -hlocalhost --socket="${SOCKET}" "$@"
+}
+
 # Execute sql script, passed via stdin
 # usage: docker_process_sql [--dont-use-mysql-root-password] [mysql-cli-args]
 #    ie: docker_process_sql --database=mydb <<<'INSERT ...'
@@ -219,24 +228,10 @@ docker_process_sql() {
 	passfileArgs=()
 	if [ '--dont-use-mysql-root-password' = "$1" ]; then
 		shift
-		unset MYSQL_PWD
+		MYSQL_PWD= docker_exec_client "$@"
 	else
-		export MYSQL_PWD=$MARIADB_ROOT_PASSWORD
+		MYSQL_PWD=$MARIADB_ROOT_PASSWORD docker_exec_client "$@"
 	fi
-	local count=5
-	while [ $count -gt 0 ] && [ ! -S "${SOCKET}" ]
-	do
-		count=$(( $count - 1 ))
-		mysql_note "Waiting for MariaDB to start, $count more seconds"
-		sleep 1
-	done
-	# args sent in can override this db, since they will be later in the command
-	if [ -n "$MYSQL_DATABASE" ]; then
-		set -- --database="$MYSQL_DATABASE" "$@"
-	fi
-
-	mysql --protocol=socket -uroot -hlocalhost --socket="${SOCKET}" "$@"
-	unset MYSQL_PWD
 }
 
 # SQL escape the string $1 to be placed in a string literal.
@@ -259,11 +254,9 @@ docker_setup_db() {
 				echo "/*!100400 ALTER TABLE $table TRANSACTIONAL=0 */;"
 			done
 
-			# sed on "Local time zone" is for https://bugs.mysql.com/bug.php?id=20545
-			# Offset quoting is because of MDEV-25556 (10.6)
+			# sed is for https://bugs.mysql.com/bug.php?id=20545
 			mysql_tzinfo_to_sql /usr/share/zoneinfo \
-				| sed -e 's/Local time zone must be set--see zic manual page/FCTY/' \
-				      -e 's/Offset/`Offset`/'
+				| sed 's/Local time zone must be set--see zic manual page/FCTY/'
 
 			for table in "${tztables[@]}"; do
 				echo "/*!100400 ALTER TABLE $table TRANSACTIONAL=1 */;"
@@ -273,13 +266,14 @@ docker_setup_db() {
 	fi
 	# Generate random root password
 	if [ -n "$MARIADB_RANDOM_ROOT_PASSWORD" ]; then
-		export MARIADB_ROOT_PASSWORD="$(pwgen --numerals --capitalize --symbols --remove-chars="'\\" -1 32)"
-		export MYSQL_ROOT_PASSWORD=$MARIADB_ROOT_PASSWORD
+		MARIADB_ROOT_PASSWORD="$(pwgen --numerals --capitalize --symbols --remove-chars="'\\" -1 32)"
+		export MARIADB_ROOT_PASSWORD MYSQL_ROOT_PASSWORD=$MARIADB_ROOT_PASSWORD
 		mysql_note "GENERATED ROOT PASSWORD: $MARIADB_ROOT_PASSWORD"
 	fi
 	# Sets root password and creates root users for non-localhost hosts
 	local rootCreate=
-	local rootPasswordEscaped=$( docker_sql_escape_string_literal "${MARIADB_ROOT_PASSWORD}" )
+	local rootPasswordEscaped
+	rootPasswordEscaped=$( docker_sql_escape_string_literal "${MARIADB_ROOT_PASSWORD}" )
 
 	# default root to listen for connections from anywhere
 	if [ -n "$MARIADB_ROOT_HOST" ] && [ "$MARIADB_ROOT_HOST" != 'localhost' ]; then
@@ -321,7 +315,8 @@ docker_setup_db() {
 	if [ -n "$MARIADB_USER" ] && [ -n "$MARIADB_PASSWORD" ]; then
 		mysql_note "Creating user ${MARIADB_USER}"
 		# SQL escape the user password, \ followed by '
-		local userPasswordEscaped=$( docker_sql_escape_string_literal "${MARIADB_PASSWORD}" )
+		local userPasswordEscaped
+		userPasswordEscaped=$( docker_sql_escape_string_literal "${MARIADB_PASSWORD}" )
 		docker_process_sql --database=mysql --binary-mode <<-EOSQL_USER
 			SET @@SESSION.SQL_MODE=REPLACE(@@SESSION.SQL_MODE, 'NO_BACKSLASH_ESCAPES', '');
 			CREATE USER '$MARIADB_USER'@'%' IDENTIFIED BY '$userPasswordEscaped';
