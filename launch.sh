@@ -36,7 +36,7 @@ docker_login () {
 
 # decrypt
 decrypt () {
-  sudo apt-get update > /dev/null 2>&1
+  sudo apt-get update -y
   sudo apt-get install -y git-crypt
 
   tee /tmp/key.hex <<<$CONNECTOR_TEST_SECRET_KEY
