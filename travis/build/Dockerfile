@@ -1,6 +1,6 @@
-
 # vim:set ft=dockerfile:
 FROM ubuntu:focal
+
 # add our user and group first to make sure their IDs get assigned consistently, regardless of whatever dependencies get added
 RUN groupadd -r mysql && useradd -r -g mysql mysql
 
@@ -10,63 +10,102 @@ RUN set -ex; \
 	if ! which gpg; then \
 		apt-get install -y --no-install-recommends gnupg; \
 	fi; \
+	if ! gpg --version | grep -q '^gpg (GnuPG) 1\.'; then \
 # Ubuntu includes "gnupg" (not "gnupg2", but still 2.x), but not dirmngr, and gnupg 2.x requires dirmngr
 # so, if we're not running gnupg 1.x, explicitly install dirmngr too
-	if ! gpg --version | grep -q '^gpg (GnuPG) 1\.'; then \
-		 apt-get install -y --no-install-recommends dirmngr; \
+		apt-get install -y --no-install-recommends dirmngr; \
 	fi; \
 	rm -rf /var/lib/apt/lists/*
 
 # add gosu for easy step-down from root
-ENV GOSU_VERSION 1.10
-RUN set -ex; \
-	\
-	fetchDeps=' \
-		ca-certificates \
-		wget \
-	'; \
+# https://github.com/tianon/gosu/releases
+ENV GOSU_VERSION 1.12
+RUN set -eux; \
 	apt-get update; \
-	apt-get install -y --no-install-recommends $fetchDeps; \
+	DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends ca-certificates; \
+	savedAptMark="$(apt-mark showmanual)"; \
+	apt-get install -y --no-install-recommends wget; \
 	rm -rf /var/lib/apt/lists/*; \
-	\
 	dpkgArch="$(dpkg --print-architecture | awk -F- '{ print $NF }')"; \
 	wget -O /usr/local/bin/gosu "https://github.com/tianon/gosu/releases/download/$GOSU_VERSION/gosu-$dpkgArch"; \
 	wget -O /usr/local/bin/gosu.asc "https://github.com/tianon/gosu/releases/download/$GOSU_VERSION/gosu-$dpkgArch.asc"; \
-	\
-# verify the signature
 	export GNUPGHOME="$(mktemp -d)"; \
-	gpg --batch --keyserver ha.pool.sks-keyservers.net --recv-keys B42F6819007F00F88E364FD4036A9C25BF357DD4; \
+	gpg --batch --keyserver hkps://keys.openpgp.org --recv-keys B42F6819007F00F88E364FD4036A9C25BF357DD4; \
 	gpg --batch --verify /usr/local/bin/gosu.asc /usr/local/bin/gosu; \
-	command -v gpgconf > /dev/null && gpgconf --kill all || :; \
-	rm -r "$GNUPGHOME" /usr/local/bin/gosu.asc; \
-	\
+	gpgconf --kill all; \
+	rm -rf "$GNUPGHOME" /usr/local/bin/gosu.asc; \
+	apt-mark auto '.*' > /dev/null; \
+	[ -z "$savedAptMark" ] || apt-mark manual $savedAptMark > /dev/null; \
+	apt-get purge -y --auto-remove -o APT::AutoRemove::RecommendsImportant=false; \
 	chmod +x /usr/local/bin/gosu; \
-# verify that the binary works
-	gosu nobody true; \
-	\
-	apt-get purge -y --auto-remove $fetchDeps
+	gosu --version; \
+	gosu nobody true
 
 RUN mkdir /docker-entrypoint-initdb.d
 
+# install "libjemalloc2" as it offers better performance in some cases. Use with LD_PRELOAD
 # install "pwgen" for randomizing passwords
-# install "apt-transport-https" for Percona's repo (switched to https-only)
-RUN apt-get update && apt-get install -y --no-install-recommends \
-		apt-transport-https ca-certificates \
-		tzdata \
+# install "tzdata" for /usr/share/zoneinfo/
+# install "xz-utils" for .sql.xz docker-entrypoint-initdb.d files
+# install "zstd" for .sql.zst docker-entrypoint-initdb.d files
+RUN set -ex; \
+	apt-get update; \
+	DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
+		libjemalloc2 \
 		pwgen \
-	&& rm -rf /var/lib/apt/lists/*
+		tzdata \
+		xz-utils \
+		zstd \
+	; \
+	rm -rf /var/lib/apt/lists/*
 
-RUN { \
-		echo "mariadb-server-10.6" mysql-server/root_password password 'unused'; \
-		echo "mariadb-server-10.6" mysql-server/root_password_again password 'unused'; \
-	} | debconf-set-selections
+ENV GPG_KEYS \
+# pub   rsa4096 2016-03-30 [SC]
+#         177F 4010 FE56 CA33 3630  0305 F165 6F24 C74C D1D8
+# uid           [ unknown] MariaDB Signing Key <signing-key@mariadb.org>
+# sub   rsa4096 2016-03-30 [E]
+	177F4010FE56CA3336300305F1656F24C74CD1D8
+RUN set -ex; \
+	export GNUPGHOME="$(mktemp -d)"; \
+	for key in $GPG_KEYS; do \
+		gpg --batch --keyserver keyserver.ubuntu.com --recv-keys "$key"; \
+	done; \
+	gpg --batch --export $GPG_KEYS > /etc/apt/trusted.gpg.d/mariadb.gpg; \
+	command -v gpgconf > /dev/null && gpgconf --kill all || :; \
+	rm -r "$GNUPGHOME"; \
+	apt-key list
+
+# bashbrew-architectures: amd64 arm64v8 ppc64le
+ENV MARIADB_MAJOR 10.6
+ENV MARIADB_VERSION 1:10.6.2+maria~focal
+# release-status:RC
+# (https://downloads.mariadb.org/mariadb/+releases/)
+
+RUN set -e;\
+	echo "deb https://ftp.osuosl.org/pub/mariadb/repo/$MARIADB_MAJOR/ubuntu focal main" > /etc/apt/sources.list.d/mariadb.list; \
+	{ \
+		echo 'Package: *'; \
+		echo 'Pin: release o=MariaDB'; \
+		echo 'Pin-Priority: 999'; \
+	} > /etc/apt/preferences.d/mariadb
+# add repository pinning to make sure dependencies from this MariaDB repo are preferred over Debian dependencies
+#  libmariadbclient18 : Depends: libmysqlclient18 (= 5.5.42+maria-1~wheezy) but 5.5.43-0+deb7u1 is to be installed
+
+# the "/var/lib/mysql" stuff here is because the mysql-server postinst doesn't have an explicit way to disable the mysql_install_db codepath besides having a database already "configured" (ie, stuff in /var/lib/mysql/mysql)
+# also, we set debconf keys to make APT a little quieter
+RUN set -ex; \
+	{ \
+		echo "mariadb-server-$MARIADB_MAJOR" mysql-server/root_password password 'unused'; \
+		echo "mariadb-server-$MARIADB_MAJOR" mysql-server/root_password_again password 'unused'; \
+	} | debconf-set-selections; \
+	apt-get update;
 
 RUN apt-get update -y
 RUN apt-get install -y software-properties-common wget
-RUN apt-key adv --recv-keys --keyserver keyserver.ubuntu.com 0xcbcb082a1bb943db
-RUN apt-key adv --recv-keys --keyserver ha.pool.sks-keyservers.net F1656F24C74CD1D8
-RUN echo 'deb http://yum.mariadb.org/galera/repo4/deb focal main' > /etc/apt/sources.list.d/galera-test-repo.list
-RUN apt-get update -y
+#RUN apt-key adv --recv-keys --keyserver keyserver.ubuntu.com 0xcbcb082a1bb943db
+#RUN apt-key adv --recv-keys --keyserver ha.pool.sks-keyservers.net F1656F24C74CD1D8
+#RUN echo 'deb http://yum.mariadb.org/galera/repo4/deb focal main' > /etc/apt/sources.list.d/galera-test-repo.list
+#RUN apt-get update -y
 
 RUN apt-get install -y curl libdbi-perl rsync socat libnuma1 libaio1 zlib1g-dev libreadline5 libjemalloc2 libsnappy1v5 libcrack2 apt-utils
 
@@ -83,15 +122,25 @@ RUN ls -lrt /etc/mysql
 RUN ls -lrt /etc/mysql/mariadb.conf.d
 RUN find / -type f -name "*tz_info*"
 RUN ls -lrt /usr/bin/
-RUN rm -rf /var/lib/apt/lists/* \
-    	&& sed -ri 's/^user\s/#&/' /etc/mysql/my.cnf /etc/mysql/mariadb.conf.d/*.cnf \
-    	&& rm -rf /var/lib/mysql && mkdir -p /var/lib/mysql /var/run/mysqld \
-    	&& chown -R mysql:mysql /var/lib/mysql /var/run/mysqld \
-    	&& chmod 777 /var/run/mysqld \
-    	&& find /etc/mysql/ -name '*.cnf' -print0 \
-    		| xargs -0 grep -lZE '^(bind-address|log)' \
-    		| xargs -rt -0 sed -Ei 's/^(bind-address|log)/#&/' \
-    	&& echo '[mysqld]\nskip-host-cache\nskip-name-resolve' > /etc/mysql/mariadb.conf.d/docker.cnf
+
+RUN	rm -rf /var/lib/apt/lists/*; \
+# purge and re-create /var/lib/mysql with appropriate ownership
+	rm -rf /var/lib/mysql; \
+	mkdir -p /var/lib/mysql /var/run/mysqld; \
+	chown -R mysql:mysql /var/lib/mysql /var/run/mysqld; \
+# ensure that /var/run/mysqld (used for socket and lock files) is writable regardless of the UID our mysqld instance ends up having at runtime
+	chmod 777 /var/run/mysqld; \
+# comment out a few problematic configuration values
+	find /etc/mysql/ -name '*.cnf' -print0 \
+		| xargs -0 grep -lZE '^(bind-address|log|user\s)' \
+		| xargs -rt -0 sed -Ei 's/^(bind-address|log|user\s)/#&/'; \
+# don't reverse lookup hostnames, they are usually another container
+# Issue #327 Correct order of reading directories /etc/mysql/mariadb.conf.d before /etc/mysql/conf.d (mount-point per documentation)
+	if [ ! -L /etc/mysql/my.cnf ]; then sed -i -e '/includedir/i[mariadb]\nskip-host-cache\nskip-name-resolve\n' /etc/mysql/my.cnf; \
+# 10.5+
+	else sed -i -e '/includedir/ {N;s/\(.*\)\n\(.*\)/[mariadbd]\nskip-host-cache\nskip-name-resolve\n\n\2\n\1/}' \
+                /etc/mysql/mariadb.cnf; fi
+
 
 VOLUME /var/lib/mysql
 
@@ -104,4 +153,3 @@ ENTRYPOINT ["docker-entrypoint.sh"]
 
 EXPOSE 3306
 CMD ["mysqld"]
-
