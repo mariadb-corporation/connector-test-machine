@@ -20,10 +20,13 @@ RUN set -ex; \
 # add gosu for easy step-down from root
 COPY gosu /usr/local/bin/
 COPY gosu.asc /usr/local/bin/
+
 # https://github.com/tianon/gosu/releases
 RUN chmod +x /usr/local/bin/gosu; \
 	gosu --version; \
 	gosu nobody true
+
+RUN ls -lrt /usr/local/bin/
 
 RUN mkdir /docker-entrypoint-initdb.d
 
@@ -101,10 +104,6 @@ RUN dpkg --install /root/mysql-common*
 RUN dpkg --install /root/mariadb-common*
 RUN dpkg -R --unpack /root/
 RUN apt-get install -f -y
-RUN ls -lrt /etc/mysql
-RUN ls -lrt /etc/mysql/mariadb.conf.d
-RUN find / -type f -name "*tz_info*"
-RUN ls -lrt /usr/bin/
 
 RUN apt-get install -y \
 # mariadb-backup is installed at the same time so that `mysql-common` is only installed once from just mariadb repos
@@ -133,6 +132,7 @@ RUN apt-get install -y \
 VOLUME /var/lib/mysql
 
 COPY docker-entrypoint.sh /usr/local/bin/
+RUN chmod +x /usr/local/bin/docker-entrypoint.sh;
 ENTRYPOINT ["docker-entrypoint.sh"]
 
 EXPOSE 3306
