@@ -278,7 +278,7 @@ if [ -z "LOCAL" ] ; then
 fi
 
 if [ -z "DEBUG" ] ; then
-  DEBUG=0
+  DEBUG=1
 fi
 
 echo "parameters:"
