@@ -22,6 +22,7 @@ grep -o ">build-[0-9]*" index.html | grep -o "[0-9]*" | tac | while read -r line
           wget -q -o /dev/null -O $PROJ_PATH/travis/build/$file http://hasky.askmonty.org/archive/10.6/build-$line/kvm-deb-focal-amd64/debs/binary/$file
         fi
     done
+    echo "DL complete"
     exit
   else
     echo "skip build $line"
