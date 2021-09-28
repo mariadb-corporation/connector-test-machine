@@ -386,11 +386,11 @@ case $TYPE in
         docker_login
 
         /bin/bash $PROJ_PATH/travis/build/build.sh
-        if [ "$DEBUG" == "1" ] ; then
+#        if [ "$DEBUG" == "1" ] ; then
           docker build -t build:10.6 --label build $PROJ_PATH/travis/build
-        else
-          docker build -t build:10.6 --label build $PROJ_PATH/travis/build > /dev/null
-        fi
+#        else
+#          docker build -t build:10.6 --label build $PROJ_PATH/travis/build > /dev/null
+#        fi
         generate_ssl
         launch_docker
         ;;
