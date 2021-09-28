@@ -116,7 +116,7 @@ mysql_get_config() {
 
 # Do a temporary startup of the MariaDB server, for init purposes
 docker_temp_server_start() {
-	"$@" --skip-networking --socket="${SOCKET}" --wsrep_on=OFF &
+	"$@" --skip-networking --default-time-zone=SYSTEM --socket="${SOCKET}" --wsrep_on=OFF &
 	mysql_note "Waiting for server startup"
 	# only use the root password if the database has already been initializaed
 	# so that it won't try to fill in a password file when it hasn't been set yet
@@ -177,7 +177,7 @@ docker_init_database_dir() {
 		installArgs+=( --skip-test-db )
 	fi
 	# "Other options are passed to mysqld." (so we pass all "mysqld" arguments directly here)
-	mysql_install_db "${installArgs[@]}" "${@:2}"
+	mysql_install_db "${installArgs[@]}" "${@:2}" --default-time-zone=SYSTEM
 	mysql_note "Database files initialized"
 }
 
@@ -237,7 +237,9 @@ docker_process_sql() {
 # SQL escape the string $1 to be placed in a string literal.
 # escape, \ followed by '
 docker_sql_escape_string_literal() {
+	local newline=$'\n'
 	local escaped=${1//\\/\\\\}
+	escaped="${escaped//$newline/\\n}"
 	echo "${escaped//\'/\\\'}"
 }
 
@@ -350,7 +352,7 @@ _main() {
 	fi
 
 	# skip setup if they aren't running mysqld or want an option that stops mysqld
-	if [ "$1" = 'mysqld' ] && ! _mysql_want_help "$@"; then
+	if [ "$1" = 'mariadbd' ] || [ "$1" = 'mysqld' ] && ! _mysql_want_help "$@"; then
 		mysql_note "Entrypoint script for MariaDB Server ${MARIADB_VERSION} started."
 
 		mysql_check_config "$@"
