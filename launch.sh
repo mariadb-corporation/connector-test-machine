@@ -98,6 +98,7 @@ install_local () {
 
     sudo apt-get install software-properties-common
     sudo apt-key adv --fetch-keys 'https://mariadb.org/mariadb_release_signing_key.asc'
+    sudo apt-key adv --recv-keys --keyserver hkp://keyserver.ubuntu.com:80 F1656F24C74CD1D8
     sudo add-apt-repository "deb [arch=amd64,arm64,ppc64el] http://ftp.igh.cnrs.fr/pub/mariadb/repo/${VERSION}/ubuntu ${TRAVIS_DIST} main"
     sudo apt update
     echo "mariadb-server-${VERSION} mysql-server/root_password password heyPassw0-rd" | sudo debconf-set-selections
