@@ -77,10 +77,6 @@ install_osx () {
 
   mysql.server start
 
-  export TEST_DB_HOST=mariadb.example.com
-  export TEST_DB_PORT=3306
-  export TEST_DB_USER=boby
-  export TEST_DB_PASSWORD=heyPassw0-rd
   export TEST_REQUIRE_TLS=0
 
   echo "adding database and user"
@@ -101,19 +97,15 @@ install_local () {
     sudo apt-key adv --recv-keys --keyserver hkp://keyserver.ubuntu.com:80 F1656F24C74CD1D8
     sudo add-apt-repository "deb [arch=amd64,arm64,ppc64el] http://ftp.igh.cnrs.fr/pub/mariadb/repo/${VERSION}/ubuntu ${TRAVIS_DIST} main"
     sudo apt update
-    echo "mariadb-server-${VERSION} mysql-server/root_password password heyPassw0-rd" | sudo debconf-set-selections
-    echo "mariadb-server-${VERSION} mysql-server/root_password_again password heyPassw0-rd" | sudo debconf-set-selections
+    echo "mariadb-server-${VERSION} mysql-server/root_password password ${TEST_DB_PASSWORD}" | sudo debconf-set-selections
+    echo "mariadb-server-${VERSION} mysql-server/root_password_again password ${TEST_DB_PASSWORD}" | sudo debconf-set-selections
     sudo apt-get -y install mariadb-server
-    export TEST_DB_HOST=mariadb.example.com
-    export TEST_DB_PORT=3306
-    export TEST_DB_USER=boby
-    export TEST_DB_PASSWORD=heyPassw0-rd
     export TEST_REQUIRE_TLS=0
 
     echo "adding database and user"
     if [ $VERSION == "10.2" ] || [ $VERSION == "10.3" ] ; then
-      mysql -uroot --password=heyPassw0-rd -e "create DATABASE IF NOT EXISTS ${TEST_DB_DATABASE}"
-      mysql -uroot --password=heyPassw0-rd ${TEST_DB_DATABASE} < $PROJ_PATH/travis/sql/dbinit.sql
+      mysql -uroot --password=${TEST_DB_PASSWORD} -e "create DATABASE IF NOT EXISTS ${TEST_DB_DATABASE}"
+      mysql -uroot --password=${TEST_DB_PASSWORD} ${TEST_DB_DATABASE} < $PROJ_PATH/travis/sql/dbinit.sql
     else
       sudo mysql -e "create DATABASE IF NOT EXISTS ${TEST_DB_DATABASE}"
       sudo mysql ${TEST_DB_DATABASE} < $PROJ_PATH/travis/sql/dbinit.sql
@@ -162,19 +154,19 @@ check_server_status () {
 
     echo >&2 'data server start process failed.'
     exit 1
+  else
+    echo 'data server active'
   fi
 }
 
 # launch docker instances
 launch_docker () {
   export TEST_REQUIRE_TLS=0
+  export TEST_DB_PORT=3305
   export ENTRYPOINT=$PROJ_PATH/travis/sql
   export ENTRYPOINT_PAM=$PROJ_PATH/travis/pam
   export COMPOSE_FILE=$PROJ_PATH/travis/docker-compose.yml
-  export TEST_DB_HOST=mariadb.example.com
-  export TEST_DB_PORT=3305
-  export TEST_DB_USER=boby
-  export TEST_DB_PASSWORD=heyPassw0-rd
+
   export PACKET_SIZE_VAL="${PACKET_SIZE}M"
   export INNODB_LOG_FILE_SIZE="${PACKET_SIZE}0M"
 
@@ -299,6 +291,10 @@ fi
 
 export TEST_DB_DATABASE=$DATABASE
 export TYPE_VERS=$"$TYPE:$VERSION"
+export TEST_DB_HOST=mariadb.example.com
+export TEST_DB_PORT=3306
+export TEST_DB_USER=boby
+export TEST_DB_PASSWORD=heyPassw!#20-rd
 
 echo '{"ipv6":true,"fixed-cidr-v6":"2001:db8:1::/64"}' | sudo tee /etc/docker/daemon.json
 sudo service docker restart
@@ -366,15 +362,13 @@ case $TYPE in
           exit 41
         fi
 
-        docker_login
+        decrypt
 
         mapfile ES_TOKEN < $PROJ_PATH/secretdir/mariadb-es-token.txt
-        # change to https://github.com/mariadb-corporation/MariaDB-ES-Docker
-        # when PR https://github.com/mariadb-corporation/MariaDB-ES-Docker/pull/2 is fixed
-        git clone https://github.com/rusher/MariaDB-ES-Docker.git
-        cd MariaDB-ES-Docker
-        docker build --no-cache -t mariadb-es:$VERSION --build-arg ES_TOKEN=$ES_TOKEN --build-arg ES_VERSION=$VERSION -f Dockerfile .
-        cd ..
+        docker login docker.mariadb.com --username diego.dupin@mariadb.com --password $ES_TOKEN
+        docker pull docker.mariadb.com/es-server:$VERSION
+        export TYPE_VERS=$"docker.mariadb.com/es-server:$VERSION"
+
         generate_ssl
         launch_docker
         ;;
