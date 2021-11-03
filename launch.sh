@@ -294,7 +294,7 @@ export TYPE_VERS=$"$TYPE:$VERSION"
 export TEST_DB_HOST=mariadb.example.com
 export TEST_DB_PORT=3306
 export TEST_DB_USER=boby
-export TEST_DB_PASSWORD=heyPassw!#20-rd
+export TEST_DB_PASSWORD=heyPassw!µ20§rd
 
 echo '{"ipv6":true,"fixed-cidr-v6":"2001:db8:1::/64"}' | sudo tee /etc/docker/daemon.json
 sudo service docker restart
