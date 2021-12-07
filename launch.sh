@@ -165,6 +165,9 @@ launch_docker () {
   export TEST_DB_PORT=3305
   export ENTRYPOINT=$PROJ_PATH/travis/sql
   export ENTRYPOINT_PAM=$PROJ_PATH/travis/pam
+  if [ "$TYPE" == 'mariadb-es' ] ; then
+    export ENTRYPOINT=$PROJ_PATH/travis/sql-es
+  fi
   export COMPOSE_FILE=$PROJ_PATH/travis/docker-compose.yml
 
   export PACKET_SIZE_VAL="${PACKET_SIZE}M"
@@ -294,7 +297,7 @@ export TYPE_VERS=$"$TYPE:$VERSION"
 export TEST_DB_HOST=mariadb.example.com
 export TEST_DB_PORT=3306
 export TEST_DB_USER=boby
-export TEST_DB_PASSWORD=heyPassw!µ20§rd
+export TEST_DB_PASSWORD=heyPassword
 
 echo '{"ipv6":true,"fixed-cidr-v6":"2001:db8:1::/64"}' | sudo tee /etc/docker/daemon.json
 sudo service docker restart
@@ -361,7 +364,7 @@ case $TYPE in
           echo "database must be provided for $TYPE"
           exit 41
         fi
-
+        export TEST_DB_PASSWORD=$'heyPassw-!µ20§rd'
         decrypt
 
         mapfile ES_TOKEN < $PROJ_PATH/secretdir/mariadb-es-token.txt
