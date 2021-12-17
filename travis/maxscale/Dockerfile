@@ -12,7 +12,7 @@ RUN sudo add-apt-repository 'deb [arch=amd64,arm64,ppc64el] http://mariadb.mirro
 RUN sudo apt update
 RUN apt-get install -y curl mariadb-client
 
-RUN curl -o maxscale.deb https://dlm.mariadb.com/1937827/maxscale/6.2.0/packages/ubuntu/bionic/x86_64/maxscale-6.2.0-1.ubuntu.bionic.x86_64.deb
+RUN curl -fLsS -o maxscale.deb https://dlm.mariadb.com/1937827/maxscale/6.2.0/packages/ubuntu/bionic/x86_64/maxscale-6.2.0-1.ubuntu.bionic.x86_64.deb
 RUN sudo dpkg --install ./maxscale.deb
 
 COPY maxscale/docker-entrypoint.sh /
