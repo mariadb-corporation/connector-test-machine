@@ -196,10 +196,6 @@ launch_docker () {
       export TEST_DB_PORT=4006
       export TEST_MAXSCALE_TLS_PORT=4009
       export COMPOSE_FILE=$PROJ_PATH/travis/maxscale-compose.yml
-      if [ -z "$VERSION" ] ; then
-        export VERSION=2.5.17
-      fi
-      echo "building maxscale version $VERSION"
       #if [ "$DEBUG" = "1" ] ; then
       docker-compose -f ${COMPOSE_FILE} build
       #else
