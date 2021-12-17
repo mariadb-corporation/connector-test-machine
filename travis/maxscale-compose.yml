@@ -32,5 +32,4 @@ services:
     build:
       context: .
       dockerfile: maxscale/Dockerfile
-      args:
-        MAXSCALE_VERSION: "${VERSION:-2.5.17}"
+
