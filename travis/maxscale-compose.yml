@@ -2,16 +2,23 @@ version: '2.1'
 services:
   db:
     image: mariadb:10.6
-    command: --max-connections=500 --max-allowed-packet=$PACKET_SIZE_VAL --innodb-log-file-size=$INNODB_LOG_FILE_SIZE --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci --ssl-ca=/etc/sslcert/ca.crt --ssl-cert=/etc/sslcert/server.crt --ssl-key=/etc/sslcert/server.key --bind-address=0.0.0.0
+    command: --max-connections=500 --max-allowed-packet=$PACKET_SIZE_VAL --innodb-log-file-size=$INNODB_LOG_FILE_SIZE --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci --ssl-ca=/etc/sslcert/ca.crt --ssl-cert=/etc/sslcert/server.crt --ssl-key=/etc/sslcert/server.key --bind-address=0.0.0.0 --performance-schema=ON $ADDITIONAL_CONF
     ports:
       - 3305:3306
     volumes:
       - /etc/ssl/mariadb:/etc/sslcert
       - $ENTRYPOINT:/docker-entrypoint-initdb.d
+      - $ENTRYPOINT:/es-initdb.d
       - $ENTRYPOINT_PAM:/pam
     environment:
+      MARIADB_USER: $TEST_DB_USER
+      MYSQL_USER: $TEST_DB_USER
+      MARIADB_PASSWORD: "heyPassword"
+      MYSQL_PASSWORD: "heyPassword"
+      MARIADB_ROOT_PASSWORD: "heyPassword"
+      MYSQL_ROOT_PASSWORD: "heyPassword"
+      MARIADB_DATABASE: $TEST_DB_DATABASE
       MYSQL_DATABASE: $TEST_DB_DATABASE
-      MYSQL_ALLOW_EMPTY_PASSWORD: 1
     healthcheck:
       test: ["CMD", "mysql", "--protocol=tcp", "-uboby", "-h127.0.0.1", "--password=heyPassword"]
       timeout: 20s
@@ -27,8 +34,10 @@ services:
       - 4006:4006
       - 4008:4008
       - 4009:4009
+      - 4016:4016
     volumes:
       - /etc/ssl/mariadb:/etc/sslcert
+      - $ENTRYPOINT_PAM:/pam
     build:
       context: .
       dockerfile: maxscale/Dockerfile

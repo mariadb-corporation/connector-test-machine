@@ -4,26 +4,26 @@ set -e
 
 echo 'creating configuration done'
 
-sleep 15
+#sleep 15
 
 #################################################################################################
 # wait for db availability for 60s
 #################################################################################################
-mysql=( mysql --protocol=tcp -uboby -hdb --password=heyPassword --port=3306 )
-
-for i in {60..0}; do
-    if echo 'use test2' | "${mysql[@]}" &> /dev/null; then
-        break
-    fi
-    echo 'DB init process in progress...'
-    sleep 1
-done
-
-echo 'use test2' | "${mysql[@]}"
-if [ "$i" = 0 ]; then
-    echo 'DB init process failed.'
-    exit 1
-fi
+#mysql=( mysql --protocol=tcp -uboby -hdb --password=heyPassword --port=3306 )
+#
+#for i in {20..0}; do
+#    if echo 'DO 1' | "${mysql[@]}" &> /dev/null; then
+#        break
+#    fi
+#    echo 'DB init process in progress...'
+#    sleep 1
+#done
+#
+#echo 'DO 1' | "${mysql[@]}"
+#if [ "$i" = 0 ]; then
+#    echo 'DB init process failed.'
+#    exit 1
+#fi
 
 echo 'maxscale launching ...'
 

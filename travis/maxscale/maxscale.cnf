@@ -81,14 +81,14 @@ router_options=slave
 type=service
 router=readwritesplit
 servers=server1
-#version_string=10.6.99-MariaDB-maxScale
+version_string=10.6.99-MariaDB-maxScale-6.2.0
 user=boby
 password=heyPassword
 
 [Read-Write-Service2]
 type=service
 router=readwritesplit
-#version_string=10.6.99-MariaDB-maxScale
+version_string=10.6.99-MariaDB-maxScale-6.2.0
 servers=server2
 user=boby
 password=heyPassword
@@ -111,7 +111,6 @@ service=Read-Write-Service
 protocol=MariaDBClient
 port=4006
 
-
 [Read-Write-Listener2]
 type=listener
 service=Read-Write-Service2
@@ -121,3 +120,11 @@ ssl=true
 ssl_ca_cert=/etc/sslcert/ca.crt
 ssl_cert=/etc/sslcert/server.crt
 ssl_key=/etc/sslcert/server.key
+
+
+[Read-Write-Listener3]
+type=listener
+service=Read-Write-Service
+protocol=MariaDBClient
+port=4016
+authenticator=PAMAuth

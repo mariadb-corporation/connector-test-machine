@@ -122,17 +122,24 @@ install_local () {
     sudo chmod +xr /etc/mysql/conf.d/unix.cnf
     tail /etc/mysql/conf.d/unix.cnf
 
+    if [ "$TYPE" == "mariadb" ] ; then
+      export TEST_PAM_USER=testPam
+      export TEST_PAM_PWD=myPwd
+      echo 'add PAM user'
+      sudo bash $PROJ_PATH/travis/pam/pam.sh
+    fi
+
     echo "restart mariadb server"
     sudo service mariadb restart
 
     # wait for initialisation
-    check_server_status
+    check_server_status 3306
     echo 'server up !'
   fi
 }
 
 check_server_status () {
-  mysqlCmd=( mysql --protocol=TCP -u${TEST_DB_USER} --port=${TEST_DB_PORT} ${TEST_DB_DATABASE} --password=${TEST_DB_PASSWORD})
+  mysqlCmd=( mysql --protocol=TCP -u${TEST_DB_USER} --port=${1} ${TEST_DB_DATABASE} --password=${TEST_DB_PASSWORD})
   for i in {15..0}; do
     if echo 'SELECT 1' | "${mysqlCmd[@]}" &> /dev/null; then
         break
@@ -196,36 +203,54 @@ launch_docker () {
       export TEST_DB_PORT=4006
       export TEST_MAXSCALE_TLS_PORT=4009
       export COMPOSE_FILE=$PROJ_PATH/travis/maxscale-compose.yml
-      #if [ "$DEBUG" = "1" ] ; then
       echo "building maxscale version 6.2.0"
       docker-compose -f ${COMPOSE_FILE} build
-      #else
-      #  docker-compose -f ${COMPOSE_FILE} build > /dev/null
-      #fi
+
   fi
 
   # launch docker server and maxscale
-  docker-compose -f ${COMPOSE_FILE} up -d
+  docker-compose -f ${COMPOSE_FILE} up -d db
 
   # wait for docker initialisation
-  check_server_status
+  check_server_status 3305
 
   echo 'data server active !'
 
-  if [ "$TYPE" == "mariadb" ] ; then
+  if [ "$TYPE" == "mariadb" ] || [ "$TYPE" == "maxscale" ] ; then
 
     export TEST_PAM_USER=testPam
     export TEST_PAM_PWD=myPwd
     echo 'add PAM user'
     # execute pam
     docker-compose -f ${COMPOSE_FILE} exec -u root db bash /pam/pam.sh
+
     sleep 1
-    echo 'reboot server'
+    echo 'rebooting server'
     docker-compose -f ${COMPOSE_FILE} stop db
     docker-compose -f ${COMPOSE_FILE} start db
 
     # wait for restart
-    check_server_status
+    check_server_status 3305
+    echo 'server with PAM active !'
+
+    if [ "$TYPE" == "maxscale" ] ; then
+
+      # wait for maxscale initialisation
+      echo 'starting maxscale'
+      docker-compose -f ${COMPOSE_FILE} up -d maxscale
+
+      check_server_status 4006
+      echo 'maxscale active !'
+      export TEST_PAM_PORT=4016
+
+      # create PAM user on maxscale
+      docker-compose -f ${COMPOSE_FILE} exec -u root maxscale bash /pam/pam-create-user.sh
+
+      docker-compose -f ${COMPOSE_FILE} stop maxscale
+      docker-compose -f ${COMPOSE_FILE} start maxscale
+      check_server_status 4006
+      echo 'maxscale with PAM active !'
+    fi
   fi
 }
 
