@@ -81,14 +81,14 @@ router_options=slave
 type=service
 router=readwritesplit
 servers=server1
-version_string=10.6.99-MariaDB-maxScale-6.2.0
+version_string=10.6.99-MariaDB-maxScale-6.1.4
 user=boby
 password=heyPassword
 
 [Read-Write-Service2]
 type=service
 router=readwritesplit
-version_string=10.6.99-MariaDB-maxScale-6.2.0
+version_string=10.6.99-MariaDB-maxScale-6.1.4
 servers=server2
 user=boby
 password=heyPassword
