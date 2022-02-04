@@ -117,6 +117,11 @@ install_local () {
     sudo cp $PROJ_PATH/travis/unix.cnf /etc/mysql/conf.d/unix.cnf
     sudo sh -c "echo 'max_allowed_packet=${PACKET_SIZE}M' >> /etc/mysql/conf.d/unix.cnf"
     sudo sh -c "echo 'innodb_log_file_size=${PACKET_SIZE}0M' >> /etc/mysql/conf.d/unix.cnf"
+    if [ $CLEAR_TEXT == "1" ] ; then
+      echo "adding pam_use_cleartext_plugin in conf"
+      sudo sh -c "echo '[mariadb]' >> /etc/mysql/conf.d/unix.cnf"
+      sudo sh -c "echo 'pam_use_cleartext_plugin' >> /etc/mysql/conf.d/unix.cnf"
+    fi
 
     sudo ls -lrt /etc/mysql/conf.d/
     sudo chmod +xr /etc/mysql/conf.d/unix.cnf
@@ -266,7 +271,7 @@ export PROJ_PATH="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pw
 echo "parsing parameters"
 
 PACKET_SIZE=20
-while getopts ":t:v:d:n:l:p:g:" flag; do
+while getopts ":t:v:d:n:l:p:g:c:" flag; do
     case "${flag}" in
         t) TYPE=${OPTARG};;
         v) VERSION=${OPTARG};;
@@ -275,6 +280,7 @@ while getopts ":t:v:d:n:l:p:g:" flag; do
         l) LOCAL=${OPTARG};;
         p) PACKET_SIZE=${OPTARG};;
         g) DEBUG=${OPTARG};;
+        c) CLEAR_TEXT=${OPTARG};;
     esac
 done
 
@@ -308,6 +314,7 @@ echo "NATIVE: ${NATIVE}"
 echo "LOCAL: ${LOCAL}"
 echo "PROJ_PATH: ${PROJ_PATH}"
 echo "PACKET_SIZE: ${PACKET_SIZE}"
+echo "CLEAR_TEXT: ${CLEAR_TEXT}"
 if [ -z "$CONNECTOR_TEST_SECRET_KEY" ] ; then
   echo "CONNECTOR_TEST_SECRET_KEY env not set"
 else
