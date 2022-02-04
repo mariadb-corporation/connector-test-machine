@@ -120,7 +120,7 @@ install_local () {
     if [ $CLEAR_TEXT == "1" ] ; then
       echo "adding pam_use_cleartext_plugin in conf"
       sudo sh -c "echo '[mariadb]' >> /etc/mysql/conf.d/unix.cnf"
-      sudo sh -c "echo 'pam_use_cleartext_plugin' >> /etc/mysql/conf.d/unix.cnf"
+      sudo sh -c "echo 'pam_use_cleartext_plugin=ON' >> /etc/mysql/conf.d/unix.cnf"
     fi
 
     sudo ls -lrt /etc/mysql/conf.d/
