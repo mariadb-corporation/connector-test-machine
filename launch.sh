@@ -405,8 +405,8 @@ case $TYPE in
 
         mapfile ES_TOKEN < $PROJ_PATH/secretdir/mariadb-es-token.txt
         docker login docker.mariadb.com --username diego.dupin@mariadb.com --password $ES_TOKEN
-        docker pull docker.mariadb.com/es-server:$VERSION
-        export TYPE_VERS=$"docker.mariadb.com/es-server:$VERSION"
+        docker pull docker.mariadb.com/enterprise-server:$VERSION
+        export TYPE_VERS=$"docker.mariadb.com/enterprise-server:$VERSION"
 
         generate_ssl
         launch_docker
