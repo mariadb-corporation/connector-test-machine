@@ -23,6 +23,7 @@ gen_cert_subject() {
 main() {
   local fqdn="$1"
   local sslDir="$2"
+  local cnfDir="$3"
   [[ "${fqdn}" != "" ]] || print_usage
   [[ -d "${sslDir}" ]] || print_error "Directory does not exist: ${sslDir}"
 
@@ -78,8 +79,8 @@ main() {
   -CAkey "${caKeyFile}" \
   -days 3650 \
   -in "${csrFile}" \
-  -signkey "${keyFile}" \
-  -out "${certFile}"
+  -out "${certFile}" \
+  -extfile "${cnfDir}/server_cert_ext.cnf"
 
   log "Generating client certificate"
   openssl req \
@@ -98,7 +99,8 @@ main() {
   -CA "${caCertFile}" \
   -CAkey "${caKeyFile}" \
   -set_serial 01 \
-  -out "${clientCertFile}"
+  -out "${clientCertFile}" \
+  -extfile "${cnfDir}/client_cert_ext.cnf"
 
   # Now generate a keystore with the client cert & key
   log "Generating client keystore"
