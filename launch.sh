@@ -12,6 +12,7 @@ generate_ssl () {
   sudo mkdir -p /etc/ssl/mariadb
   sudo /bin/bash $PROJ_PATH/gen-ssl.sh mariadb.example.com /etc/ssl/mariadb $PROJ_PATH
   sudo sh -c 'cat /etc/ssl/mariadb/ca.crt /etc/ssl/mariadb/server.crt > /etc/ssl/mariadb/ca_server.crt'
+  sudo sh -c 'cat /etc/ssl/mariadb/ca.crt /etc/ssl/mariadb/client.crt > /etc/ssl/mariadb/ca_client.crt'
   export TEST_DB_SERVER_CERT=/etc/ssl/mariadb/ca_server.crt
   export TEST_DB_SERVER_CERT_STRING=$(cat /etc/ssl/mariadb/ca_server.crt)
   export TEST_DB_RSA_PUBLIC_KEY=/etc/ssl/mariadb/public.key
@@ -19,6 +20,7 @@ generate_ssl () {
   export TEST_DB_SERVER_INTERMEDIATE_CERT=/etc/ssl/mariadb/server.crt
   export TEST_DB_CLIENT_KEY=/etc/ssl/mariadb/client.key
   export TEST_DB_CLIENT_CERT=/etc/ssl/mariadb/client.crt
+  export TEST_DB_CLIENT_CERT_FULL=/etc/ssl/mariadb/ca_client.crt
   export TEST_DB_CLIENT_PKCS=/etc/ssl/mariadb/fullclient-keystore.p12
   sudo chmod +r /etc/ssl/mariadb/*
   sudo chown -Rv mysql:root /etc/ssl/mariadb
