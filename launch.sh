@@ -354,9 +354,10 @@ case $TYPE in
           echo "private environment variable CONNECTOR_TEST_SECRET_KEY must be provided for $TYPE"
           exit 10
         fi
+
         decrypt
         source $PROJ_PATH/secretdir/xpand.sh
-        check_server_status 3306
+        check_server_status 3316
         ;;
 
     maxscale)
