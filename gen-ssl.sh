@@ -79,8 +79,8 @@ main() {
   -CAkey "${caKeyFile}" \
   -days 3650 \
   -in "${csrFile}" \
-  -out "${certFile}" \
-  -extfile "${cnfDir}/server_cert_ext.cnf"
+  -out "${certFile}"
+#  -extfile "${cnfDir}/server_cert_ext.cnf"
 
   log "Generating client certificate"
   openssl req \
