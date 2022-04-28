@@ -72,30 +72,16 @@ main() {
   -nodes
 
   log "Generating X509 certificate"
-  if [ "$srvType" == "mysql" ]  ; then
-    #for some reason, mysql only accept double signed certificates !?
-    openssl x509 \
-    -req \
-    -sha1 \
-    -set_serial 01 \
-    -CA "${caCertFile}" \
-    -CAkey "${caKeyFile}" \
-    -days 3650 \
-    -in "${csrFile}" \
-    -signkey "${keyFile}" \
-    -out "${certFile}"
-  else
-    openssl x509 \
-    -req \
-    -sha1 \
-    -set_serial 01 \
-    -CA "${caCertFile}" \
-    -CAkey "${caKeyFile}" \
-    -days 3650 \
-    -in "${csrFile}" \
-    -out "${certFile}" \
-    -extfile "${cnfDir}/server_cert_ext.cnf"
-  fi
+  openssl x509 \
+  -req \
+  -sha1 \
+  -set_serial 01 \
+  -CA "${caCertFile}" \
+  -CAkey "${caKeyFile}" \
+  -days 3650 \
+  -in "${csrFile}" \
+  -signkey "${keyFile}" \
+  -out "${certFile}"
 
   log "Generating client certificate"
   openssl req \

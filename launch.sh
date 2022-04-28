@@ -119,7 +119,7 @@ install_local () {
     sudo cp $PROJ_PATH/travis/unix.cnf /etc/mysql/conf.d/unix.cnf
     sudo sh -c "echo 'max_allowed_packet=${PACKET_SIZE}M' >> /etc/mysql/conf.d/unix.cnf"
     sudo sh -c "echo 'innodb_log_file_size=${PACKET_SIZE}0M' >> /etc/mysql/conf.d/unix.cnf"
-    if [ $CLEAR_TEXT == "1" ] ; then
+    if [ "$CLEAR_TEXT" == "1" ] ; then
       echo "adding pam_use_cleartext_plugin in conf"
       sudo sh -c "echo '[mariadb]' >> /etc/mysql/conf.d/unix.cnf"
       sudo sh -c "echo 'plugin_load_add=auth_pam' >> /etc/mysql/conf.d/unix.cnf"
