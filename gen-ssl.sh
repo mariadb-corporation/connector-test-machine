@@ -100,8 +100,7 @@ main() {
   -CA "${caCertFile}" \
   -CAkey "${caKeyFile}" \
   -set_serial 01 \
-  -out "${clientCertFile}" \
-  -extfile "${cnfDir}/client_cert_ext.cnf"
+  -out "${clientCertFile}"
 
   # Now generate a keystore with the client cert & key
   log "Generating client keystore"
