@@ -23,6 +23,7 @@ generate_ssl () {
   export TEST_DB_CLIENT_CERT_FULL=/etc/ssl/mariadb/ca_client.crt
   export TEST_DB_CLIENT_PKCS=/etc/ssl/mariadb/fullclient-keystore.p12
   sudo chmod +r /etc/ssl/mariadb/*
+  sudo chown -Rv root /etc/ssl/mariadb
   sudo chown -Rv mysql:root /etc/ssl/mariadb
   ls -lrt /etc/ssl/mariadb
 }
@@ -30,7 +31,9 @@ generate_ssl () {
 docker_login () {
   if [ -n "$CONNECTOR_TEST_SECRET_KEY" ] ; then
     decrypt
-    mapfile DOCKER_PWD < $PROJ_PATH/secretdir/docker-pwd.txt
+    DOCKER_PWD=$(<$PROJ_PATH/secretdir/docker-pwd.txt)
+    # mapfile DOCKER_PWD < $PROJ_PATH/secretdir/docker-pwd.txt
+
     docker login --username mariadbtest --password $DOCKER_PWD
     DOCKER_PWD=removed
   fi
@@ -38,8 +41,12 @@ docker_login () {
 
 # decrypt
 decrypt () {
-  sudo apt-get update -y
-  sudo apt-get install -y git-crypt
+  if [ "$TRAVIS_OS_NAME" == "osx" ] ; then
+    brew install --cask git-crypt
+  else
+    sudo apt-get update -y
+    sudo apt-get install -y git-crypt
+  fi
 
   tee /tmp/key.hex <<<$CONNECTOR_TEST_SECRET_KEY
   xxd -plain -revert /tmp/key.hex /tmp/key.txt
@@ -51,6 +58,7 @@ decrypt () {
   rm /tmp/key.txt
   rm /tmp/key.hex
 }
+
 
 remove_mysql () {
   sudo apt-get remove --purge mysql-server mysql-client mysql-common
@@ -65,25 +73,34 @@ remove_mysql () {
 }
 
 install_osx () {
+  brew update
+  echo 'remove mysql if any !'
+  brew uninstall mysql
+
+  # configuration addition (ssl mostly)
+  sudo sh -c "echo '[mysqld]' >> /etc/my.cnf"
+  sudo sh -c "echo 'port=3306' >> /etc/my.cnf"
+  sudo sh -c "cat $PROJ_PATH/travis/unix.cnf >> /etc/my.cnf"
+  sudo sh -c "echo 'max_allowed_packet=${PACKET_SIZE}M' >> /etc/my.cnf"
+  sudo sh -c "echo 'innodb_log_file_size=${PACKET_SIZE}0M' >> /etc/my.cnf"
+
+  sudo sh -c "echo '[client]' >> /etc/my.cnf"
+  sudo sh -c "echo 'protocol=tcp' >> /etc/my.cnf"
+
+  sudo ls -lrt /etc/my.cnf
+  sudo chmod +xr /etc/my.cnf
+  tail /etc/my.cnf
 
   echo 'brew install mariadb !'
-  brew install mariadb
-  # configuration addition (ssl mostly)
-  sudo cp $PROJ_PATH/travis/unix.cnf /etc/mysql/conf.d/unix.cnf
-  sudo sh -c "echo 'max_allowed_packet=${PACKET_SIZE}M' >> /etc/mysql/conf.d/unix.cnf"
-  sudo sh -c "echo 'innodb_log_file_size=${PACKET_SIZE}0M' >> /etc/mysql/conf.d/unix.cnf"
-
-  sudo ls -lrt /etc/mysql/conf.d/
-  sudo chmod +xr /etc/mysql/conf.d/unix.cnf
-  tail /etc/mysql/conf.d/unix.cnf
-
+  brew install "mariadb@$VERSION"
   mysql.server start
+  #brew services restart mariadb
 
   export TEST_REQUIRE_TLS=0
 
   echo "adding database and user"
-  sudo mysql -e "create DATABASE IF NOT EXISTS ${TEST_DB_DATABASE}"
-  sudo mysql ${TEST_DB_DATABASE} < $PROJ_PATH/travis/sql/dbinit.sql
+  sudo mysql -uroot -e "create DATABASE IF NOT EXISTS ${TEST_DB_DATABASE}"
+  sudo mysql -uroot ${TEST_DB_DATABASE} < $PROJ_PATH/travis/sql/dbinit.sql
   echo "adding database and user done"
 }
 
@@ -388,15 +405,19 @@ case $TYPE in
 
         generate_ssl
         echo "ssl files configured"
-        if [ "$TRAVIS_OS_NAME" == "osx" ] ; then
-          install_osx
-        else
-          if [ "$TYPE" == "mariadb" ] && [ "$LOCAL" == "1" ] ; then
-            install_local
+        if [ "$TYPE" == "mariadb" ] && [ "$LOCAL" == "1" ] ; then
+          if [ "$TRAVIS_OS_NAME" == "osx" ] ; then
+            install_osx
           else
-            docker_login
-            launch_docker
+            install_local
           fi
+        else
+          if [ "$TRAVIS_OS_NAME" == "osx" ] ; then
+            echo "docker is not available on travis osx. use local=1"
+            exit 31
+          fi
+          docker_login
+          launch_docker
         fi
         ;;
 
