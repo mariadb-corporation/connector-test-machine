@@ -8,6 +8,9 @@ set -o pipefail
 
 # generate ssl for server and client
 generate_ssl () {
+  openssl version -a
+  sudo apt-get install openssl
+  openssl version -a
   ls -lrt /etc/ssl
   sudo mkdir -p /etc/ssl/mariadb
   sudo /bin/bash $PROJ_PATH/gen-ssl.sh mariadb.example.com /etc/ssl/mariadb $PROJ_PATH/cert $TYPE
