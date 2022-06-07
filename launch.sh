@@ -304,6 +304,7 @@ while getopts ":t:v:d:n:l:p:g:c:" flag; do
         p) PACKET_SIZE=${OPTARG};;
         g) DEBUG=${OPTARG};;
         c) CLEAR_TEXT=${OPTARG};;
+        s) DISABLE_SSL=${OPTARG};;
     esac
 done
 
@@ -320,11 +321,11 @@ if [ -z "$NATIVE" ] ; then
   NATIVE=1
 fi
 
-if [ -z "LOCAL" ] ; then
+if [ -z "$LOCAL" ] ; then
   LOCAL=0
 fi
 
-if [ -z "DEBUG" ] ; then
+if [ -z "$DEBUG" ] ; then
   DEBUG="1"
 fi
 
@@ -338,6 +339,7 @@ echo "LOCAL: ${LOCAL}"
 echo "PROJ_PATH: ${PROJ_PATH}"
 echo "PACKET_SIZE: ${PACKET_SIZE}"
 echo "CLEAR_TEXT: ${CLEAR_TEXT}"
+echo "DISABLE_SSL: ${DISABLE_SSL}"
 if [ -z "$CONNECTOR_TEST_SECRET_KEY" ] ; then
   echo "CONNECTOR_TEST_SECRET_KEY env not set"
 else
@@ -405,9 +407,10 @@ case $TYPE in
           echo "database must be provided for $TYPE"
           exit 31
         fi
-
-        generate_ssl
-        echo "ssl files configured"
+        if [ -z "$DISABLE_SSL" ] ; then
+          generate_ssl
+          echo "ssl files configured"
+        fi
         if [ "$TYPE" == "mariadb" ] && [ "$LOCAL" == "1" ] ; then
           if [ "$TRAVIS_OS_NAME" == "osx" ] ; then
             install_osx
