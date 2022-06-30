@@ -461,7 +461,7 @@ case $TYPE in
 
         /bin/bash $PROJ_PATH/travis/build/build.sh
 #        if [ "$DEBUG" == "1" ] ; then
-          docker build -t build:10.6 --label build $PROJ_PATH/travis/build
+          docker build -t build:10.9 --label build $PROJ_PATH/travis/build
 #        else
 #          docker build -t build:10.6 --label build $PROJ_PATH/travis/build > /dev/null
 #        fi
