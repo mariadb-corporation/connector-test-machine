@@ -329,6 +329,10 @@ if [ -z "$DEBUG" ] ; then
   DEBUG="1"
 fi
 
+if [ "$TYPE" == "build" ] ; then
+  VERSION="10.9"
+fi
+
 echo "parameters:"
 echo "TYPE: ${TYPE}"
 echo "VERSION: ${VERSION}"
