@@ -45,12 +45,10 @@ call connector-test-machine/travis/windows-download.bat %v%
 msiexec /i server.msi INSTALLDIR=c:\projects\server SERVICENAME=mariadb ALLOWREMOTEROOTACCESS=true /qn
 c:\projects\server\bin\mysql.exe -e "create database %d%" --user=root
 
-dir .
-
 type connector-test-machine\travis\win.cnf >> c:\projects\server\data\my.ini
 type c:\projects\server\data\my.ini
 
-net stop mariadb && net start mariadb
+rem net stop mariadb && net start mariadb
 
 set TEST_DB_USER=root
 set TEST_DB_HOST=localhost
@@ -59,4 +57,13 @@ set TEST_DB_DATABASE=%d%
 set TEST_DB_PORT=3306
 set TEST_REQUIRE_TLS=0
 
+
+echo export TEST_DB_USER=root > settestenv.sh
+echo export TEST_DB_HOST=localhost >> settestenv.sh
+echo export TEST_DB_PASSWORD= >> settestenv.sh
+echo export TEST_DB_DATABASE=%d% >> settestenv.sh
+echo export TEST_DB_PORT=3306 >> settestenv.sh
+echo export TEST_REQUIRE_TLS=0 >> settestenv.sh
+
+dir .
 
