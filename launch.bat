@@ -48,8 +48,17 @@ c:\projects\server\bin\mysql.exe -e "create database %d%" --user=root
 type connector-test-machine\travis\win.cnf >> c:\projects\server\data\my.ini
 type c:\projects\server\data\my.ini
 
-rem net stop mariadb && net start mariadb
+net stop mariadb && net start mariadb
 
+REM Currently neither settings done with setx nor with set appear to be in the environment of the build script. It still won't hurt to have them 
+setx TEST_DB_USER root
+setx TEST_DB_HOST localhost
+setx TEST_DB_PASSWORD ""
+setx TEST_DB_DATABASE %d%
+setx TEST_DB_PORT 3306
+setx TEST_REQUIRE_TLS 0
+
+REM setx does not change current env.
 set TEST_DB_USER=root
 set TEST_DB_HOST=localhost
 set TEST_DB_PASSWORD=
