@@ -128,3 +128,7 @@ service=Read-Write-Service
 protocol=MariaDBClient
 port=4016
 authenticator=PAMAuth
+
+[Hint]
+type=filter
+module=hintfilter
