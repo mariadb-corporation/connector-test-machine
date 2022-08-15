@@ -233,7 +233,9 @@ launch_docker () {
       export COMPOSE_FILE=$PROJ_PATH/travis/maxscale-compose.yml
       echo "building maxscale version 6.2.0"
       docker-compose -f ${COMPOSE_FILE} build
-
+  elif [ "$TYPE" == 'galera' ] ; then
+      echo "launching galera"
+      export COMPOSE_FILE=$PROJ_PATH/travis/galera-compose.yml
   fi
 
   # launch docker server and maxscale
@@ -402,7 +404,7 @@ case $TYPE in
         launch_docker
         ;;
 
-    mariadb|mysql)
+    mariadb|mysql|galera)
         if [ -z "$VERSION" ] ; then
           echo "version must be provided for $TYPE"
           exit 30
