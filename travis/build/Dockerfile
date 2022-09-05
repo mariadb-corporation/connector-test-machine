@@ -63,9 +63,9 @@ RUN set -ex; \
 	apt-key list
 
 # bashbrew-architectures: amd64 arm64v8 ppc64le
-ARG MARIADB_MAJOR=10.9
+ARG MARIADB_MAJOR=10.10
 ENV MARIADB_MAJOR $MARIADB_MAJOR
-ARG MARIADB_VERSION=1:10.9.1+maria~focal
+ARG MARIADB_VERSION=1:10.10.1+maria~focal
 ENV MARIADB_VERSION $MARIADB_VERSION
 # release-status:Stable
 # (https://downloads.mariadb.org/mariadb/+releases/)
