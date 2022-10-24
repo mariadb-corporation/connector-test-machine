@@ -394,12 +394,6 @@ case $TYPE in
           exit 20
         fi
         generate_ssl
-        if [ -z "$VERSION" ] ; then
-          export MAXSCALE_VERSION=2.5.18
-        else
-          export MAXSCALE_VERSION=$VERSION
-        fi
-        echo "using MAXSCALE_VERSION=$MAXSCALE_VERSION"
         docker_login
         launch_docker
         ;;
