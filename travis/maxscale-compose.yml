@@ -39,4 +39,4 @@ services:
     volumes:
       - /etc/ssl/mariadb:/etc/sslcert
       - $ENTRYPOINT_PAM:/pam
-      - $PROJ_PATH/travis/maxscale/maxscale.cnf:/etc/maxscale.cnf.d/my-maxscale.cnf
+      - $PROJ_PATH/travis/maxscale/maxscale.cnf:/etc/maxscale.cnf
