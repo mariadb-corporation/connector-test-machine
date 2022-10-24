@@ -32,6 +32,31 @@ address=db
 port=3306
 protocol=MariaDBBackend
 
+
+# Monitor for the servers
+#
+# This will keep MaxScale aware of the state of the servers.
+# MariaDB Monitor documentation:
+# https://mariadb.com/kb/en/mariadb-maxscale-24-mariadb-monitor/
+
+[MariaDB-Monitor]
+type=monitor
+module=mariadbmon
+servers=server1
+user=boby
+password=heyPassword
+monitor_interval=2000
+failcount=50
+
+[MariaDB-Monitor2]
+type=monitor
+module=mariadbmon
+servers=server2
+user=boby
+password=heyPassword
+monitor_interval=2000
+failcount=50
+
 # Service definitions
 #
 # Service Definition for a read-only service and

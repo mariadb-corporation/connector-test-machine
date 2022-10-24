@@ -11,8 +11,8 @@ services:
       - $ENTRYPOINT:/es-initdb.d
       - $ENTRYPOINT_PAM:/pam
     environment:
-      MARIADB_USER: $TEST_DB_USER
-      MYSQL_USER: $TEST_DB_USER
+      MARIADB_USER: "boby"
+      MYSQL_USER: "boby"
       MARIADB_PASSWORD: "heyPassword"
       MYSQL_PASSWORD: "heyPassword"
       MARIADB_ROOT_PASSWORD: "heyPassword"

@@ -231,7 +231,7 @@ launch_docker () {
       export TEST_DB_PORT=4006
       export TEST_MAXSCALE_TLS_PORT=4009
       export COMPOSE_FILE=$PROJ_PATH/travis/maxscale-compose.yml
-      echo "building maxscale version 6.2.0"
+      echo "building maxscale"
       docker-compose -f ${COMPOSE_FILE} build
   elif [ "$TYPE" == 'galera' ] ; then
       echo "launching galera"
@@ -246,7 +246,7 @@ launch_docker () {
 
   echo 'data server active !'
 
-  if [ "$TYPE" == "mariadb" ] || [ "$TYPE" == "maxscale" ] ; then
+  if [ "$TYPE" == "mariadb" ] ; then
 
     export TEST_PAM_USER=testPam
     export TEST_PAM_PWD=myPwd
@@ -262,25 +262,15 @@ launch_docker () {
     # wait for restart
     check_server_status 3305
     echo 'server with PAM active !'
+  fi
 
-    if [ "$TYPE" == "maxscale" ] ; then
+  if [ "$TYPE" == "maxscale" ] ; then
+    # wait for maxscale initialisation
+    echo 'starting maxscale'
+    docker-compose -f ${COMPOSE_FILE} up -d maxscale
 
-      # wait for maxscale initialisation
-      echo 'starting maxscale'
-      docker-compose -f ${COMPOSE_FILE} up -d maxscale
-
-      check_server_status 4006
-      echo 'maxscale active !'
-      export TEST_PAM_PORT=4016
-
-      # create PAM user on maxscale
-      docker-compose -f ${COMPOSE_FILE} exec -u root maxscale bash /pam/pam-create-user.sh
-
-      docker-compose -f ${COMPOSE_FILE} stop maxscale
-      docker-compose -f ${COMPOSE_FILE} start maxscale
-      check_server_status 4006
-      echo 'maxscale with PAM active !'
-    fi
+    check_server_status 4006
+    echo 'maxscale active !'
   fi
 }
 
