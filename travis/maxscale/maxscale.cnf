@@ -15,16 +15,6 @@ threads=auto
 # address of a MariaDB server.
 #
 
-[server2]
-type=server
-address=database
-port=3306
-protocol=MariaDBBackend
-ssl=true
-ssl_cert=/etc/sslcert/server.pem
-ssl_key=/etc/sslcert/server.key
-ssl_ca_cert=/etc/sslcert/ca.pem
-
 [server1]
 type=server
 address=db
@@ -41,7 +31,7 @@ protocol=MariaDBBackend
 [MariaDB-Monitor]
 type=monitor
 module=mariadbmon
-servers=server1,server2
+servers=server1
 user=boby
 password=heyPassword
 monitor_interval=2s
@@ -65,9 +55,6 @@ user=boby
 password=heyPassword
 router_options=slave
 
-# ReadWriteSplit documentation:
-# https://mariadb.com/kb/en/mariadb-maxscale-24-readwritesplit/
-
 [Read-Write-Service]
 type=service
 router=readwritesplit
@@ -79,8 +66,8 @@ password=heyPassword
 [Read-Write-Service2]
 type=service
 router=readwritesplit
+servers=server1
 version_string=10.6.99-MariaDB-maxScale-6.1.4
-servers=server2
 user=boby
 password=heyPassword
 
