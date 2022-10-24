@@ -21,7 +21,7 @@ address=database
 port=3306
 protocol=MariaDBBackend
 ssl=true
-ssl_ca_cert=/etc/sslcert/server.crt
+ssl_ca_cert=/etc/sslcert/ca_server.crt
 ssl_cert=/etc/sslcert/client.crt
 ssl_key=/etc/sslcert/client.key
 

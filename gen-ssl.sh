@@ -45,7 +45,8 @@ main() {
 
   log "Generating CA certificate"
   openssl req \
-  -sha1 \
+  -addext basicConstraints=critical,CA:TRUE \
+  -sha256 \
   -new \
   -x509 \
   -nodes \
@@ -64,7 +65,7 @@ main() {
   openssl req \
   -new \
   -batch \
-  -sha1 \
+  -sha256 \
   -subj "$(gen_cert_subject "$fqdn")" \
   -set_serial 01 \
   -key "${keyFile}" \
@@ -74,7 +75,7 @@ main() {
   log "Generating X509 certificate"
   openssl x509 \
   -req \
-  -sha1 \
+  -sha256 \
   -set_serial 01 \
   -CA "${caCertFile}" \
   -CAkey "${caKeyFile}" \

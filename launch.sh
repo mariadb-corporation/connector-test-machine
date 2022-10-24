@@ -265,6 +265,11 @@ launch_docker () {
   fi
 
   if [ "$TYPE" == "maxscale" ] ; then
+    docker-compose -f ${COMPOSE_FILE} exec maxscale yum install ca-certificates
+    docker-compose -f ${COMPOSE_FILE} exec maxscale update-ca-trust force-enable
+    docker-compose -f ${COMPOSE_FILE} exec maxscale cp /etc/sslcert/ca.crt /etc/pki/ca-trust/source/anchors/
+    docker-compose -f ${COMPOSE_FILE} exec maxscale update-ca-trust extract
+    docker-compose -f ${COMPOSE_FILE} exec maxscale update-ca-trust
     # wait for maxscale initialisation
     echo 'starting maxscale'
     docker-compose -f ${COMPOSE_FILE} up -d maxscale
