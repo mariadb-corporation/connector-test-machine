@@ -14,16 +14,16 @@ generate_ssl () {
   ls -lrt /etc/ssl
   sudo mkdir -p /etc/ssl/mariadb
   sudo /bin/bash $PROJ_PATH/gen-ssl.sh mariadb.example.com /etc/ssl/mariadb $PROJ_PATH/cert $TYPE
-  sudo sh -c 'cat /etc/ssl/mariadb/ca.crt /etc/ssl/mariadb/server.crt > /etc/ssl/mariadb/ca_server.crt'
-  sudo sh -c 'cat /etc/ssl/mariadb/ca.crt /etc/ssl/mariadb/client.crt > /etc/ssl/mariadb/ca_client.crt'
-  export TEST_DB_SERVER_CERT=/etc/ssl/mariadb/ca_server.crt
-  export TEST_DB_SERVER_CERT_STRING=$(cat /etc/ssl/mariadb/ca_server.crt)
+  sudo sh -c 'cat /etc/ssl/mariadb/ca.pem /etc/ssl/mariadb/server.pem > /etc/ssl/mariadb/ca_server.pem'
+  sudo sh -c 'cat /etc/ssl/mariadb/ca.pem /etc/ssl/mariadb/client.pem > /etc/ssl/mariadb/ca_client.pem'
+  export TEST_DB_SERVER_CERT=/etc/ssl/mariadb/ca_server.pem
+  export TEST_DB_SERVER_CERT_STRING=$(cat /etc/ssl/mariadb/ca_server.pem)
   export TEST_DB_RSA_PUBLIC_KEY=/etc/ssl/mariadb/public.key
-  export TEST_DB_SERVER_CA_CERT=/etc/ssl/mariadb/ca.crt
-  export TEST_DB_SERVER_INTERMEDIATE_CERT=/etc/ssl/mariadb/server.crt
+  export TEST_DB_SERVER_CA_CERT=/etc/ssl/mariadb/ca.pem
+  export TEST_DB_SERVER_INTERMEDIATE_CERT=/etc/ssl/mariadb/server.pem
   export TEST_DB_CLIENT_KEY=/etc/ssl/mariadb/client.key
-  export TEST_DB_CLIENT_CERT=/etc/ssl/mariadb/client.crt
-  export TEST_DB_CLIENT_CERT_FULL=/etc/ssl/mariadb/ca_client.crt
+  export TEST_DB_CLIENT_CERT=/etc/ssl/mariadb/client.pem
+  export TEST_DB_CLIENT_CERT_FULL=/etc/ssl/mariadb/ca_client.pem
   export TEST_DB_CLIENT_PKCS=/etc/ssl/mariadb/fullclient-keystore.p12
   sudo chmod +r /etc/ssl/mariadb/*
   sudo chown -Rv root /etc/ssl/mariadb
@@ -265,11 +265,11 @@ launch_docker () {
   fi
 
   if [ "$TYPE" == "maxscale" ] ; then
-    docker-compose -f ${COMPOSE_FILE} exec maxscale yum install ca-certificates
-    docker-compose -f ${COMPOSE_FILE} exec maxscale update-ca-trust force-enable
-    docker-compose -f ${COMPOSE_FILE} exec maxscale cp /etc/sslcert/ca.crt /etc/pki/ca-trust/source/anchors/
-    docker-compose -f ${COMPOSE_FILE} exec maxscale update-ca-trust extract
-    docker-compose -f ${COMPOSE_FILE} exec maxscale update-ca-trust
+#    docker-compose -f ${COMPOSE_FILE} exec maxscale yum install ca-certificates
+#    docker-compose -f ${COMPOSE_FILE} exec maxscale update-ca-trust force-enable
+#    docker-compose -f ${COMPOSE_FILE} exec maxscale cp /etc/sslcert/ca.crt /etc/pki/ca-trust/source/anchors/
+#    docker-compose -f ${COMPOSE_FILE} exec maxscale update-ca-trust extract
+#    docker-compose -f ${COMPOSE_FILE} exec maxscale update-ca-trust
     # wait for maxscale initialisation
     echo 'starting maxscale'
     docker-compose -f ${COMPOSE_FILE} up -d maxscale

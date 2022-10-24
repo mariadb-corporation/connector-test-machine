@@ -28,14 +28,16 @@ main() {
   [[ "${fqdn}" != "" ]] || print_usage
   [[ -d "${sslDir}" ]] || print_error "Directory does not exist: ${sslDir}"
 
-  local caCertFile="${sslDir}/ca.crt"
+  local caCertFile="${sslDir}/ca.pem"
   local caKeyFile="${sslDir}/ca.key"
-  local certFile="${sslDir}/server.crt"
+  local certFile="${sslDir}/server.pem"
   local keyFile="${sslDir}/server.key"
-  local pubkeyFile="${sslDir}/public.key"
-  local csrFile=$(mktemp)
-  local clientCertFile="${sslDir}/client.crt"
+  local serverReqFile="${sslDir}/server-req.pem"
+
+  local clientReqFile="${sslDir}/client-req.pem"
+  local clientCertFile="${sslDir}/client.pem"
   local clientKeyFile="${sslDir}/client.key"
+
   local tmpKeystoreFile=$(mktemp)
   local pcks12FullKeystoreFile="${sslDir}/fullclient-keystore.p12"
   local clientReqFile=$(mktemp)
@@ -44,63 +46,37 @@ main() {
   openssl genrsa -out "${caKeyFile}" 2048
 
   log "Generating CA certificate"
-  openssl req \
-  -addext basicConstraints=critical,CA:TRUE \
-  -sha256 \
-  -new \
-  -x509 \
-  -nodes \
-  -days 3650 \
-  -subj "$(gen_cert_subject ca.example.com)" \
-  -key "${caKeyFile}" \
-  -out "${caCertFile}"
+  openssl req -new -x509 -nodes -days 365000 \
+   -subj "$(gen_cert_subject ca.example.com)" \
+   -key "${caKeyFile}" \
+   -out "${caCertFile}"
 
-  log "Generating private key"
-  openssl genrsa -out "${keyFile}" 2048
+  log "Generate the private key and certificate request"
+  openssl req -newkey rsa:2048 -nodes -days 365000 \
+   -subj "$(gen_cert_subject "$fqdn")" \
+   -keyout  "${keyFile}" \
+   -out "${serverReqFile}"
 
-  log "Generating public key"
-  openssl rsa -in "${keyFile}" -pubout -out "${pubkeyFile}"
+  log "Generate the X509 certificate for the server"
+  openssl x509 -req -days 365000 -set_serial 01 \
+     -in "${serverReqFile}" \
+     -out "${certFile}" \
+     -CA "${caCertFile}" \
+     -CAkey "${caKeyFile}"
 
-  log "Generating certificate signing request"
-  openssl req \
-  -new \
-  -batch \
-  -sha256 \
-  -subj "$(gen_cert_subject "$fqdn")" \
-  -set_serial 01 \
-  -key "${keyFile}" \
-  -out "${csrFile}" \
-  -nodes
 
-  log "Generating X509 certificate"
-  openssl x509 \
-  -req \
-  -sha256 \
-  -set_serial 01 \
-  -CA "${caCertFile}" \
-  -CAkey "${caKeyFile}" \
-  -days 3650 \
-  -in "${csrFile}" \
-  -out "${certFile}"
+  log "Generate the client private key and certificate request:"
+  openssl req -newkey rsa:2048 -nodes -days 365000 \
+   -subj "$(gen_cert_subject "$fqdn")" \
+   -keyout  "${clientKeyFile}" \
+   -out "${clientReqFile}"
 
-  log "Generating client certificate"
-  openssl req \
-  -batch \
-  -newkey rsa:2048 \
-  -days 3600 \
-  -subj "$(gen_cert_subject "$fqdn")" \
-  -nodes \
-  -keyout "${clientKeyFile}" \
-  -out "${clientReqFile}"
-
-  openssl x509 \
-  -req \
-  -in "${clientReqFile}" \
-  -days 3600 \
-  -CA "${caCertFile}" \
-  -CAkey "${caKeyFile}" \
-  -set_serial 01 \
-  -out "${clientCertFile}"
+  log "Generate the X509 certificate for the server"
+  openssl x509 -req -days 365000 -set_serial 01 \
+     -in "${clientReqFile}" \
+     -out "${clientCertFile}" \
+     -CA "${caCertFile}" \
+     -CAkey "${caKeyFile}"
 
   # Now generate a keystore with the client cert & key
   log "Generating client keystore"
