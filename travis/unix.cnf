@@ -6,3 +6,4 @@ ssl_ca=/etc/ssl/mariadb/ca.pem
 ssl_cert=/etc/ssl/mariadb/server.pem
 ssl_key=/etc/ssl/mariadb/server.key
 local_infile=1
+log_error=mariadb.err
