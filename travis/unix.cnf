@@ -2,7 +2,7 @@
 max_connections=500
 character_set_server=utf8mb4
 collation_server=utf8mb4_unicode_ci
-ssl_ca=/etc/ssl/mariadb/ca.crt
-ssl_cert=/etc/ssl/mariadb/server.crt
+ssl_ca=/etc/ssl/mariadb/ca.pem
+ssl_cert=/etc/ssl/mariadb/server.pem
 ssl_key=/etc/ssl/mariadb/server.key
 local_infile=1

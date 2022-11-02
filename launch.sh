@@ -262,6 +262,7 @@ launch_docker () {
     # wait for restart
     check_server_status 3305
     echo 'server with PAM active !'
+    docker-compose logs db
   fi
 
   if [ "$TYPE" == "maxscale" ] ; then
