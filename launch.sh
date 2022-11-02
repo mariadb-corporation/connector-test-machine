@@ -163,7 +163,7 @@ install_local () {
     # wait for initialisation
     check_server_status 3306
     echo 'server up !'
-    tail -200 /var/lib/mysql/mariadb.err
+    sudo tail -200 /var/lib/mysql/mariadb.err
 
   fi
 }
