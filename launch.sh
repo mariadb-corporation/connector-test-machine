@@ -265,6 +265,9 @@ launch_docker () {
     check_server_status 3305
     echo 'server with PAM active !'
     docker-compose logs db
+    mysqlCmd=( mysql --protocol=TCP -u${TEST_DB_USER} --port=3305 ${TEST_DB_DATABASE} --password=${TEST_DB_PASSWORD})
+    echo 'SELECT @@version' | "${mysqlCmd[@]}"
+
   fi
 
   if [ "$TYPE" == "maxscale" ] ; then
@@ -280,6 +283,7 @@ launch_docker () {
     check_server_status 4006
     echo 'maxscale active !'
   fi
+
 }
 
 
