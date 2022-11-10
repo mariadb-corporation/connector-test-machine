@@ -14,5 +14,5 @@ services:
       MARIADB_ROOT_PASSWORD: $TEST_DB_PASSWORD
       MARIADB_DATABASE: $TEST_DB_DATABASE
       MARIADB_GALERA_MARIABACKUP_PASSWORD: $TEST_DB_PASSWORD
-      ALLOW_EMPTY_PASSWORD: 'yes'
-      MARIADB_EXTRA_FLAGS: '--max-connections=500 --max-allowed-packet=$PACKET_SIZE_VAL --innodb-log-file-size=$INNODB_LOG_FILE_SIZE --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci --ssl-ca=/etc/sslcert/ca.crt --ssl-cert=/etc/sslcert/server.crt --ssl-key=/etc/sslcert/server.key --bind-address=0.0.0.0 --performance-schema=ON'
+      ALLOW_EMPTY_PASSWORD: yes
+      MARIADB_EXTRA_FLAGS: '--max-connections=500 --max-allowed-packet=$PACKET_SIZE_VAL --innodb-log-file-size=$INNODB_LOG_FILE_SIZE --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci --ssl-ca=/etc/sslcert/ca.pem --ssl-cert=/etc/sslcert/server.pem --ssl-key=/etc/sslcert/server.key --bind-address=0.0.0.0 --performance-schema=ON'
