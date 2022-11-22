@@ -442,7 +442,7 @@ case $TYPE in
           echo "database must be provided for $TYPE"
           exit 41
         fi
-        export TEST_DB_PASSWORD=$'heyPassw-!µ20§rd'
+        export TEST_DB_PASSWORD=$'heyPassw-!*20oRd'
         decrypt
 
         mapfile ES_TOKEN < $PROJ_PATH/secretdir/mariadb-es-token.txt
