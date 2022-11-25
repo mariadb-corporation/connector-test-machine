@@ -150,12 +150,12 @@ install_local () {
     sudo chmod +xr /etc/mysql/conf.d/unix.cnf
     tail /etc/mysql/conf.d/unix.cnf
 
-    if [ "$TYPE" == "mariadb" ] ; then
-      export TEST_PAM_USER=testPam
-      export TEST_PAM_PWD=myPwd
-      echo 'add PAM user'
-      sudo bash $PROJ_PATH/travis/pam/pam.sh
-    fi
+#    if [ "$TYPE" == "mariadb" ] ; then
+#      export TEST_PAM_USER=testPam
+#      export TEST_PAM_PWD=myPwd
+#      echo 'add PAM user'
+#      sudo bash $PROJ_PATH/travis/pam/pam.sh
+#    fi
 
     echo "restart mariadb server"
     sudo service mariadb restart
