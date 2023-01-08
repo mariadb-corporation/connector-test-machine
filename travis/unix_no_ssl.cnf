@@ -1,0 +1,6 @@
+[mysqld]
+max_connections=500
+character_set_server=utf8mb4
+collation_server=utf8mb4_unicode_ci
+local_infile=1
+log_error=mariadb.err

@@ -136,7 +136,11 @@ install_local () {
 
 
     # configuration addition (ssl mostly)
-    sudo cp $PROJ_PATH/travis/unix.cnf /etc/mysql/conf.d/unix.cnf
+    if [ -z "$DISABLE_SSL" ] ; then
+      sudo cp $PROJ_PATH/travis/unix.cnf /etc/mysql/conf.d/unix.cnf
+    else
+      sudo cp $PROJ_PATH/travis/unix_no_ssl.cnf /etc/mysql/conf.d/unix.cnf
+    fi
     sudo sh -c "echo 'max_allowed_packet=${PACKET_SIZE}M' >> /etc/mysql/conf.d/unix.cnf"
     sudo sh -c "echo 'innodb_log_file_size=${PACKET_SIZE}0M' >> /etc/mysql/conf.d/unix.cnf"
     if [ "$CLEAR_TEXT" == "1" ] ; then
