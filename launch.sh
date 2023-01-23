@@ -168,7 +168,7 @@ install_local () {
     check_server_status 3306
     echo 'server up !'
 
-    mysqlCmd=( mysql --protocol=TCP -u${TEST_DB_USER} --port=${1} ${TEST_DB_DATABASE} --password=${TEST_DB_PASSWORD})
+    mysqlCmd=( mysql --protocol=TCP -u${TEST_DB_USER} --port=${1} mysql --password=${TEST_DB_PASSWORD})
     mysql_tzinfo_to_sql /usr/share/zoneinfo | "${mysqlCmd[@]}"
 
     sudo tail -200 /var/lib/mysql/mariadb.err
