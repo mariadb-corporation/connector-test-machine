@@ -404,6 +404,7 @@ case $TYPE in
         fi
         generate_ssl
         docker_login
+        export TEST_DB_USER=xpand
         launch_docker
         ;;
 
