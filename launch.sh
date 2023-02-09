@@ -265,9 +265,9 @@ launch_docker () {
 
   # launch docker server and maxscale
   docker-compose -f ${COMPOSE_FILE} up -d db
-
   # wait for docker initialisation
   check_server_status 3305
+  docker-compose logs db
 
   echo 'data server active !'
   mysqlCmd=( mysql --protocol=TCP -u${TEST_DB_USER} --port=3305 ${TEST_DB_DATABASE} --password=${TEST_DB_PASSWORD})
