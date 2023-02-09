@@ -409,7 +409,7 @@ case $TYPE in
         ;;
 
     mariadb|mysql|galera|xpand)
-        if [ -z "$VERSION" ] ; then
+        if [ "$TYPE" != "xpand" ] && [ -z "$VERSION" ] ; then
           echo "version must be provided for $TYPE"
           exit 30
         fi
