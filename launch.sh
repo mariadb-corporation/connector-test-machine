@@ -252,9 +252,13 @@ launch_docker () {
     export TMP_DB=${TEST_DB_DATABASE}
     export TEST_DB_DATABASE=test
     docker-compose -f ${COMPOSE_FILE} up -d db
+    check_server_status 3305
+    echo "xpand active"
+
     # create final database
-    mysqlCmd=( mysql --protocol=TCP -u${TEST_DB_USER} --port=3305 ${test} --password=${TEST_DB_PASSWORD})
-    echo 'CREATE DATABASE ${TMP_DB}' | "${mysqlCmd[@]}"
+    mysqlCmd=( mysql --protocol=TCP -u${TEST_DB_USER} --port=3305 test --password=${TEST_DB_PASSWORD})
+    echo "CREATE DATABASE ${TMP_DB}" | "${mysqlCmd[@]}"
+    echo "default database created"
     export TEST_DB_DATABASE=${TMP_DB}
   fi
 
