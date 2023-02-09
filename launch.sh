@@ -374,6 +374,9 @@ fi
 
 export TEST_DB_DATABASE=$DATABASE
 export TYPE_VERS=$"$TYPE:$VERSION"
+if [ "$TYPE" == "xpand" ] ; then
+  export TYPE_VERS=mariadb/xpand-single
+fi
 export TEST_DB_HOST=mariadb.example.com
 export TEST_DB_PORT=3306
 export TEST_DB_USER=boby
