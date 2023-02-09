@@ -249,6 +249,7 @@ launch_docker () {
   fi
   if [ "$TYPE" == "xpand" ] ; then
     # connect to test database
+    echo "launching xpand"
     export TMP_DB=${TEST_DB_DATABASE}
     export TEST_DB_DATABASE=test
     docker-compose -f ${COMPOSE_FILE} up -d db
@@ -411,11 +412,13 @@ case $TYPE in
         fi
         generate_ssl
         docker_login
-        export TEST_DB_USER=xpand
         launch_docker
         ;;
 
     mariadb|mysql|galera|xpand)
+        if [ "$TYPE" == "xpand" ] ; then
+          export TEST_DB_USER=xpand
+        fi
         if [ "$TYPE" != "xpand" ] && [ -z "$VERSION" ] ; then
           echo "version must be provided for $TYPE"
           exit 30
