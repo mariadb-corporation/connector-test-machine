@@ -247,6 +247,16 @@ launch_docker () {
       echo "launching galera"
       export COMPOSE_FILE=$PROJ_PATH/travis/galera-compose.yml
   fi
+  if [ "$TYPE" == "xpand" ] ; then
+    # connect to test database
+    export TMP_DB=${TEST_DB_DATABASE}
+    export TEST_DB_DATABASE=test
+    docker-compose -f ${COMPOSE_FILE} up -d db
+    # create final database
+    mysqlCmd=( mysql --protocol=TCP -u${TEST_DB_USER} --port=3305 ${test} --password=${TEST_DB_PASSWORD})
+    echo 'CREATE DATABASE ${TMP_DB}' | "${mysqlCmd[@]}"
+    export TEST_DB_DATABASE=${TMP_DB}
+  fi
 
   # launch docker server and maxscale
   docker-compose -f ${COMPOSE_FILE} up -d db
@@ -387,17 +397,6 @@ case $TYPE in
         fi
         ;;
 
-    xpand)
-        if [ -z "$CONNECTOR_TEST_SECRET_KEY" ] ; then
-          echo "private environment variable CONNECTOR_TEST_SECRET_KEY must be provided for $TYPE"
-          exit 10
-        fi
-
-        decrypt
-        source $PROJ_PATH/secretdir/xpand.sh
-        check_server_status 3316
-        ;;
-
     maxscale)
         if [ -z "$TEST_DB_DATABASE" ] ; then
           echo "database must be provided for $TYPE"
@@ -408,7 +407,7 @@ case $TYPE in
         launch_docker
         ;;
 
-    mariadb|mysql|galera)
+    mariadb|mysql|galera|xpand)
         if [ -z "$VERSION" ] ; then
           echo "version must be provided for $TYPE"
           exit 30
