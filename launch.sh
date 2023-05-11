@@ -230,6 +230,7 @@ launch_docker () {
     if [ -z "$NATIVE" ] || [ "$NATIVE" == 1 ] ; then
       export ADDITIONAL_CONF="--default-authentication-plugin=mysql_native_password $ADDITIONAL_CONF"
     fi
+    echo "Additional conf : $ADDITIONAL_CONF"
   fi
   echo "ending configuring mysql additional type"
 
@@ -289,9 +290,8 @@ launch_docker () {
     # wait for restart
     check_server_status 3305
     echo 'server with PAM active !'
-    docker-compose logs db
-
   fi
+  docker-compose logs db
 
   if [ "$TYPE" == "maxscale" ] ; then
 #    docker-compose -f ${COMPOSE_FILE} exec maxscale yum install ca-certificates
