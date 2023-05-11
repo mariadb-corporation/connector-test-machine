@@ -32,6 +32,7 @@ main() {
   local caKeyFile="${sslDir}/ca.key"
   local certFile="${sslDir}/server.pem"
   local keyFile="${sslDir}/server.key"
+  local pubkeyFile="${sslDir}/public.key"
   local serverReqFile="${sslDir}/server-req.pem"
 
   local clientReqFile="${sslDir}/client-req.pem"
@@ -56,6 +57,9 @@ main() {
    -subj "$(gen_cert_subject "$fqdn")" \
    -keyout  "${keyFile}" \
    -out "${serverReqFile}"
+
+  log "Generating public key"
+  openssl rsa -in "${keyFile}" -pubout -out "${pubkeyFile}"
 
   log "Generate the X509 certificate for the server"
   openssl x509 -req -days 365000 -set_serial 01 \
