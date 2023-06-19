@@ -129,8 +129,13 @@ install_local () {
       mysql -uroot --password=${TEST_DB_PASSWORD} -e "create DATABASE IF NOT EXISTS ${TEST_DB_DATABASE}"
       mysql -uroot --password=${TEST_DB_PASSWORD} ${TEST_DB_DATABASE} < $PROJ_PATH/travis/sql/dbinit.sql
     else
-      sudo mysql -e "create DATABASE IF NOT EXISTS ${TEST_DB_DATABASE}"
-      sudo mysql ${TEST_DB_DATABASE} < $PROJ_PATH/travis/sql/dbinit.sql
+      if [ $((VERSION)) >= 11 ] ; then
+        sudo mariadb -e "create DATABASE IF NOT EXISTS ${TEST_DB_DATABASE}"
+        sudo mariadb ${TEST_DB_DATABASE} < $PROJ_PATH/travis/sql/dbinit.sql
+      else
+        sudo mysql -e "create DATABASE IF NOT EXISTS ${TEST_DB_DATABASE}"
+        sudo mysql ${TEST_DB_DATABASE} < $PROJ_PATH/travis/sql/dbinit.sql
+      fi
     fi
     echo "adding database and user done"
 
@@ -167,8 +172,11 @@ install_local () {
     # wait for initialisation
     check_server_status 3306
     echo 'server up !'
-
-    mysqlCmd=( mysql --protocol=TCP -u${TEST_DB_USER} --port=${1} mysql --password=${TEST_DB_PASSWORD})
+    if [ $((VERSION)) >= 11 ] ; then
+      mysqlCmd=( mysql --protocol=TCP -u${TEST_DB_USER} --port=${1} mysql --password=${TEST_DB_PASSWORD})
+    else
+      mysqlCmd=( mariadb --protocol=TCP -u${TEST_DB_USER} --port=${1} mysql --password=${TEST_DB_PASSWORD})
+    fi
     mysql_tzinfo_to_sql /usr/share/zoneinfo | "${mysqlCmd[@]}"
 
     sudo tail -200 /var/lib/mysql/mariadb.err
