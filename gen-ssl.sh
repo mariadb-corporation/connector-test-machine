@@ -62,7 +62,7 @@ main() {
   openssl rsa -in "${keyFile}" -pubout -out "${pubkeyFile}"
 
   log "Generate the X509 certificate for the server"
-  openssl x509 -req -days 365000 -set_serial 01 \
+  openssl x509 -req -set_serial 01 \
      -in "${serverReqFile}" \
      -out "${certFile}" \
      -CA "${caCertFile}" \
