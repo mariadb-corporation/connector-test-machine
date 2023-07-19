@@ -475,10 +475,10 @@ case $TYPE in
         if [ "$LOCAL" == "1" ] ; then
           # remove mysql if present
           remove_mysql
-
-          wget https://dlm.mariadb.com/"$ES_TOKEN"/enterprise-release-helpers-staging/mariadb_es_repo_setup
+          ES_TOKEN_WITHOUT_LF=${ES_TOKEN::-1}
+          wget https://dlm.mariadb.com/"$ES_TOKEN_WITHOUT_LF"/enterprise-release-helpers-staging/mariadb_es_repo_setup
           chmod +x mariadb_es_repo_setup
-          sudo ./mariadb_es_repo_setup --token="$ES_TOKEN" --apply --skip-maxscale --skip-verify --skip-tools --skip-enterprise-tools --mariadb-server-version 23.06
+          sudo ./mariadb_es_repo_setup --token="$ES_TOKEN_WITHOUT_LF" --apply --skip-maxscale --skip-verify --skip-tools --skip-enterprise-tools --mariadb-server-version 23.06
           vi /etc/yum.repos.d/mariadb.repo
 
 
