@@ -464,10 +464,6 @@ case $TYPE in
           echo "private environment variable CONNECTOR_TEST_SECRET_KEY must be provided for $TYPE"
           exit 40
         fi
-        if [ -z "$VERSION" ] ; then
-          echo "version must be provided for $TYPE"
-          exit
-        fi
         if [ -z "$TEST_DB_DATABASE" ] ; then
           echo "database must be provided for $TYPE"
           exit 41
@@ -477,8 +473,13 @@ case $TYPE in
 
         mapfile ES_TOKEN < $PROJ_PATH/secretdir/mariadb-es-token.txt
         docker login docker.mariadb.com --username diego.dupin@mariadb.com --password $ES_TOKEN
-        docker pull docker.mariadb.com/enterprise-server:$VERSION
-        export TYPE_VERS=$"docker.mariadb.com/enterprise-server:$VERSION"
+        if [ -z "$VERSION" ] ; then
+          docker pull docker.mariadb.com/enterprise-server
+          export TYPE_VERS=$"docker.mariadb.com/enterprise-server"
+        else
+          docker pull docker.mariadb.com/enterprise-server:$VERSION
+          export TYPE_VERS=$"docker.mariadb.com/enterprise-server:$VERSION"
+        fi
 
         generate_ssl
         launch_docker
