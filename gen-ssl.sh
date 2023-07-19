@@ -103,7 +103,6 @@ main() {
   -passout pass:kspass
 
   # Clean up CSR file:
-  rm "$csrFile"
   rm "$clientReqFile"
   rm "$tmpKeystoreFile"
 
