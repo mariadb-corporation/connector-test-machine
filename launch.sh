@@ -126,7 +126,7 @@ install_repo () {
 
 install_local () {
   echo "install local version"
-  if [ "$TRAVIS_OS_NAME" == "linux" ]  ; then
+  if [ "$TRAVIS_OS_NAME" == "linux" ] ; then
     sudo apt update
     echo "mariadb-server-${VERSION} mysql-server/root_password password ${TEST_DB_PASSWORD}" | sudo debconf-set-selections
     echo "mariadb-server-${VERSION} mysql-server/root_password_again password ${TEST_DB_PASSWORD}" | sudo debconf-set-selections
@@ -139,7 +139,7 @@ install_local () {
       mysql -uroot --password=${TEST_DB_PASSWORD} -e "create DATABASE IF NOT EXISTS ${TEST_DB_DATABASE}"
       mysql -uroot --password=${TEST_DB_PASSWORD} ${TEST_DB_DATABASE} < $PROJ_PATH/travis/sql/dbinit.sql
     else
-      if [[ $VERSION = 11* ]] ; then
+      if [[ $VERSION == 11* || $VERSION == 23*]] ; then
         sudo mariadb -e "create DATABASE IF NOT EXISTS ${TEST_DB_DATABASE}"
         sudo mariadb ${TEST_DB_DATABASE} < $PROJ_PATH/travis/sql/dbinit.sql
       else
