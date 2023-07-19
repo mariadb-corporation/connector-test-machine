@@ -53,7 +53,7 @@ main() {
    -out "${caCertFile}"
 
   log "Generate the private key and certificate request"
-  openssl req -newkey rsa:2048 -nodes -days 365000 \
+  openssl req -newkey rsa:2048 -x509 -nodes -days 365000 \
    -subj "$(gen_cert_subject "$fqdn")" \
    -keyout  "${keyFile}" \
    -out "${serverReqFile}"
@@ -62,7 +62,7 @@ main() {
   openssl rsa -in "${keyFile}" -pubout -out "${pubkeyFile}"
 
   log "Generate the X509 certificate for the server"
-  openssl x509 -req -days 365000 -set_serial 01 \
+  openssl x509 -req -x509 -days 365000 -set_serial 01 \
      -in "${serverReqFile}" \
      -out "${certFile}" \
      -CA "${caCertFile}" \
@@ -70,7 +70,7 @@ main() {
 
 
   log "Generate the client private key and certificate request:"
-  openssl req -newkey rsa:2048 -nodes -days 365000 \
+  openssl req -newkey rsa:2048 -x509 -nodes -days 365000 \
    -subj "$(gen_cert_subject "$fqdn")" \
    -keyout  "${clientKeyFile}" \
    -out "${clientReqFile}"
