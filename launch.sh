@@ -139,7 +139,7 @@ install_local () {
       mysql -uroot --password=${TEST_DB_PASSWORD} -e "create DATABASE IF NOT EXISTS ${TEST_DB_DATABASE}"
       mysql -uroot --password=${TEST_DB_PASSWORD} ${TEST_DB_DATABASE} < $PROJ_PATH/travis/sql/dbinit.sql
     else
-      if [[ $VERSION == 11* || $VERSION == 23*]] ; then
+      if [[ $VERSION == 11* ]] || [[ $VERSION == 23* ]] ; then
         sudo mariadb -e "create DATABASE IF NOT EXISTS ${TEST_DB_DATABASE}"
         sudo mariadb ${TEST_DB_DATABASE} < $PROJ_PATH/travis/sql/dbinit.sql
       else
