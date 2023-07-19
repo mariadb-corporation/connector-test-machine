@@ -108,7 +108,7 @@ install_osx () {
 }
 
 # install local mariadb
-install_local () {
+install_repo () {
   echo "install local version"
   if [ "$TRAVIS_OS_NAME" == "linux" ]  ; then
     # remove mysql if present
@@ -121,6 +121,16 @@ install_local () {
     sudo apt update
     echo "mariadb-server-${VERSION} mysql-server/root_password password ${TEST_DB_PASSWORD}" | sudo debconf-set-selections
     echo "mariadb-server-${VERSION} mysql-server/root_password_again password ${TEST_DB_PASSWORD}" | sudo debconf-set-selections
+  fi
+}
+
+install_local () {
+  echo "install local version"
+  if [ "$TRAVIS_OS_NAME" == "linux" ]  ; then
+    sudo apt update
+    echo "mariadb-server-${VERSION} mysql-server/root_password password ${TEST_DB_PASSWORD}" | sudo debconf-set-selections
+    echo "mariadb-server-${VERSION} mysql-server/root_password_again password ${TEST_DB_PASSWORD}" | sudo debconf-set-selections
+
     sudo apt-get -y install mariadb-server
     export TEST_REQUIRE_TLS=0
 
@@ -447,6 +457,7 @@ case $TYPE in
           if [ "$TRAVIS_OS_NAME" == "osx" ] ; then
             install_osx
           else
+            install_repo
             install_local
           fi
         else
@@ -474,45 +485,11 @@ case $TYPE in
         mapfile ES_TOKEN < $PROJ_PATH/secretdir/mariadb-es-token.txt
         if [ "$LOCAL" == "1" ] ; then
           # remove mysql if present
-          remove_mysql
           ES_TOKEN_WITHOUT_LF=${ES_TOKEN::-1}
           wget https://dlm.mariadb.com/"$ES_TOKEN_WITHOUT_LF"/enterprise-release-helpers-staging/mariadb_es_repo_setup
           chmod +x mariadb_es_repo_setup
           sudo ./mariadb_es_repo_setup --token="$ES_TOKEN_WITHOUT_LF" --apply --skip-maxscale --skip-verify --skip-tools --skip-enterprise-tools --mariadb-server-version 23.06
-          vi /etc/yum.repos.d/mariadb.repo
-
-
-              export TEST_REQUIRE_TLS=0
-              export DISABLE_SSL=1
-              echo "adding database and user"
-              sudo mariadb -e "create DATABASE IF NOT EXISTS ${TEST_DB_DATABASE}"
-              sudo mariadb ${TEST_DB_DATABASE} < $PROJ_PATH/travis/sql/dbinit.sql
-              echo "adding database and user done"
-
-              # configuration addition (ssl mostly)
-              sudo cp $PROJ_PATH/travis/unix_no_ssl.cnf /etc/mysql/conf.d/unix.cnf
-              sudo sh -c "echo 'max_allowed_packet=${PACKET_SIZE}M' >> /etc/mysql/conf.d/unix.cnf"
-              sudo sh -c "echo 'innodb_log_file_size=${PACKET_SIZE}0M' >> /etc/mysql/conf.d/unix.cnf"
-
-              sudo ls -lrt /etc/mysql/conf.d/
-              sudo chmod +xr /etc/mysql/conf.d/unix.cnf
-              tail /etc/mysql/conf.d/unix.cnf
-
-              echo "restart mariadb server"
-              sudo service mariadb restart
-
-              # wait for initialisation
-              check_server_status 3306
-              echo 'server up !'
-              if [[ $VERSION = 11* ]] ; then
-                mysqlCmd=( mysql --protocol=TCP -u${TEST_DB_USER} --port=${1} mysql --password=${TEST_DB_PASSWORD})
-              else
-                mysqlCmd=( mariadb --protocol=TCP -u${TEST_DB_USER} --port=${1} mysql --password=${TEST_DB_PASSWORD})
-              fi
-              mysql_tzinfo_to_sql /usr/share/zoneinfo | "${mysqlCmd[@]}"
-
-              sudo tail -200 /var/lib/mysql/mariadb.err
-
+          install_local
         else
           docker login docker.mariadb.com --username diego.dupin@mariadb.com --password $ES_TOKEN
           if [ -z "$VERSION" ] ; then
