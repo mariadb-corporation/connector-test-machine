@@ -44,10 +44,13 @@ main() {
   local clientReqFile=$(mktemp)
 
   log "Generating CA key"
-  openssl genrsa -out "ca.key" 2048
+  openssl genrsa -out "${caKeyFile}" 2048
 
   log "Generating CA certificate"
-  openssl req -new -x509 -nodes -subj "/C=XX/ST=X/O=X/localityName=X/CN=ca.example.com/organizationalUnitName=X/emailAddress=X/" -key "ca.key" -out "ca.pem"
+  openssl req -new -x509 -nodes \
+   -subj "$(gen_cert_subject ca.example.com)" \
+   -key "${caKeyFile}" \
+   -out "${caCertFile}"
 
   log "Generate the private key and certificate request"
   openssl req -newkey rsa:2048 -nodes \
