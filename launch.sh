@@ -472,17 +472,60 @@ case $TYPE in
         decrypt
 
         mapfile ES_TOKEN < $PROJ_PATH/secretdir/mariadb-es-token.txt
-        docker login docker.mariadb.com --username diego.dupin@mariadb.com --password $ES_TOKEN
-        if [ -z "$VERSION" ] ; then
-          docker pull docker.mariadb.com/enterprise-server
-          export TYPE_VERS=$"docker.mariadb.com/enterprise-server"
-        else
-          docker pull docker.mariadb.com/enterprise-server:$VERSION
-          export TYPE_VERS=$"docker.mariadb.com/enterprise-server:$VERSION"
-        fi
+        if [ "$LOCAL" == "1" ] ; then
+          # remove mysql if present
+          remove_mysql
 
-        generate_ssl
-        launch_docker
+          wget https://dlm.mariadb.com/"$ES_TOKEN"/enterprise-release-helpers-staging/mariadb_es_repo_setup
+          chmod +x mariadb_es_repo_setup
+          sudo ./mariadb_es_repo_setup --token="$ES_TOKEN" --apply --skip-maxscale --skip-verify --skip-tools --skip-enterprise-tools --mariadb-server-version 23.06
+          vi /etc/yum.repos.d/mariadb.repo
+
+
+              export TEST_REQUIRE_TLS=0
+              export DISABLE_SSL=1
+              echo "adding database and user"
+              sudo mariadb -e "create DATABASE IF NOT EXISTS ${TEST_DB_DATABASE}"
+              sudo mariadb ${TEST_DB_DATABASE} < $PROJ_PATH/travis/sql/dbinit.sql
+              echo "adding database and user done"
+
+              # configuration addition (ssl mostly)
+              sudo cp $PROJ_PATH/travis/unix_no_ssl.cnf /etc/mysql/conf.d/unix.cnf
+              sudo sh -c "echo 'max_allowed_packet=${PACKET_SIZE}M' >> /etc/mysql/conf.d/unix.cnf"
+              sudo sh -c "echo 'innodb_log_file_size=${PACKET_SIZE}0M' >> /etc/mysql/conf.d/unix.cnf"
+
+              sudo ls -lrt /etc/mysql/conf.d/
+              sudo chmod +xr /etc/mysql/conf.d/unix.cnf
+              tail /etc/mysql/conf.d/unix.cnf
+
+              echo "restart mariadb server"
+              sudo service mariadb restart
+
+              # wait for initialisation
+              check_server_status 3306
+              echo 'server up !'
+              if [[ $VERSION = 11* ]] ; then
+                mysqlCmd=( mysql --protocol=TCP -u${TEST_DB_USER} --port=${1} mysql --password=${TEST_DB_PASSWORD})
+              else
+                mysqlCmd=( mariadb --protocol=TCP -u${TEST_DB_USER} --port=${1} mysql --password=${TEST_DB_PASSWORD})
+              fi
+              mysql_tzinfo_to_sql /usr/share/zoneinfo | "${mysqlCmd[@]}"
+
+              sudo tail -200 /var/lib/mysql/mariadb.err
+
+        else
+          docker login docker.mariadb.com --username diego.dupin@mariadb.com --password $ES_TOKEN
+          if [ -z "$VERSION" ] ; then
+            docker pull docker.mariadb.com/enterprise-server
+            export TYPE_VERS=$"docker.mariadb.com/enterprise-server"
+          else
+            docker pull docker.mariadb.com/enterprise-server:$VERSION
+            export TYPE_VERS=$"docker.mariadb.com/enterprise-server:$VERSION"
+          fi
+
+          generate_ssl
+          launch_docker
+        fi
         ;;
 
     build)
