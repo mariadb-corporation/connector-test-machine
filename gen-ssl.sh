@@ -89,7 +89,7 @@ main() {
   -inkey "${clientKeyFile}" \
   -out "${pcks12FullKeystoreFile}" \
   -name "mysqlAlias" \
-  -passout pass:kspass
+  -passout pass:kspass -legacy
 
   # Clean up CSR file:
   rm "$clientReqFile"
