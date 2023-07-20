@@ -84,7 +84,7 @@ main() {
 
   # Now generate a full keystore with the client cert & key + trust certificates
   log "Generating full client keystore"
-  if [ubuntuVersion >= "18" ] ; then
+  if [[ $ubuntuVersion > 20* ]] ; then
     openssl pkcs12 -export -in "${clientCertFile}" -inkey "${clientKeyFile}" -out "${pcks12FullKeystoreFile}" \
     -name "mysqlAlias" -passout pass:kspass -legacy
   else
