@@ -269,8 +269,10 @@ launch_docker () {
   elif [ "$TYPE" == 'galera' ] ; then
       echo "launching galera"
       export COMPOSE_FILE=$PROJ_PATH/travis/galera-compose.yml
-  fi
-  if [ "$TYPE" == "xpand" ] ; then
+  elif [ "$TYPE" == 'mariadb-es' ] && [ "$LOCAL" == "1" ]; then
+        echo "launching mariadb-es testing"
+        export COMPOSE_FILE=$PROJ_PATH/travis/es-compose.yml
+  elif  [ "$TYPE" == "xpand" ] ; then
     # connect to test database
     echo "launching xpand"
     export TMP_DB=${TEST_DB_DATABASE}
@@ -494,6 +496,8 @@ case $TYPE in
           chmod +x mariadb_es_repo_setup
           sudo ./mariadb_es_repo_setup --token="$ES_TOKEN_WITHOUT_LF" --apply --skip-maxscale --skip-verify --skip-tools --skip-enterprise-tools --mariadb-server-version 23.06
           install_local
+          docker login docker.mariadb.com --username diego.dupin@mariadb.com --password $ES_TOKEN
+          docker pull gcr.io/downloads-234321/es-server-test:23.06
         else
           docker login docker.mariadb.com --username diego.dupin@mariadb.com --password $ES_TOKEN
           if [ -z "$VERSION" ] ; then
