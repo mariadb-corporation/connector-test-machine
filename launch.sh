@@ -490,12 +490,6 @@ case $TYPE in
 
         mapfile ES_TOKEN < $PROJ_PATH/secretdir/mariadb-es-token.txt
         if [ "$LOCAL" == "1" ] ; then
-          # remove mysql if present
-          ES_TOKEN_WITHOUT_LF=${ES_TOKEN::-1}
-          wget https://dlm.mariadb.com/"$ES_TOKEN_WITHOUT_LF"/enterprise-release-helpers-staging/mariadb_es_repo_setup
-          chmod +x mariadb_es_repo_setup
-          sudo ./mariadb_es_repo_setup --token="$ES_TOKEN_WITHOUT_LF" --apply --skip-maxscale --skip-verify --skip-tools --skip-enterprise-tools --mariadb-server-version 23.06
-          install_local
           docker login docker.mariadb.com --username diego.dupin@mariadb.com --password $ES_TOKEN
           docker pull gcr.io/downloads-234321/es-server-test:23.06
         else
