@@ -13,7 +13,7 @@ generate_ssl () {
   openssl version -a
   ls -lrt /etc/ssl
   sudo mkdir -p /etc/ssl/mariadb
-  sudo /bin/bash $PROJ_PATH/gen-ssl.sh mariadb.example.com /etc/ssl/mariadb $PROJ_PATH/cert $TYPE
+  sudo /bin/bash $PROJ_PATH/gen-ssl.sh mariadb.example.com /etc/ssl/mariadb $PROJ_PATH/cert $TYPE $UBUNTU_VERSION
   sudo sh -c 'cat /etc/ssl/mariadb/ca.pem /etc/ssl/mariadb/server.pem > /etc/ssl/mariadb/ca_server.pem'
   sudo sh -c 'cat /etc/ssl/mariadb/ca.pem /etc/ssl/mariadb/client.pem > /etc/ssl/mariadb/ca_client.pem'
   export TEST_DB_SERVER_CERT=/etc/ssl/mariadb/ca_server.pem
@@ -412,6 +412,10 @@ export TEST_DB_PASSWORD=heyPassword
 echo '{"ipv6":true,"fixed-cidr-v6":"2001:db8:1::/64"}' | sudo tee /etc/docker/daemon.json
 sudo service docker restart
 export TEST_DB_HOST_IPV6=2001:db8:1::/64
+Var=$(lsb_release -r)
+echo "$Var"
+export UBUNTU_VERSION=$(cut -f2 <<< "$Var")
+echo "$UBUNTU_VERSION"
 
 case $TYPE in
     skysql|skysql-ha)

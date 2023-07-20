@@ -25,6 +25,7 @@ main() {
   local sslDir="$2"
   local cnfDir="$3"
   local srvType="$4"
+  local ubuntuVersion="$5"
   [[ "${fqdn}" != "" ]] || print_usage
   [[ -d "${sslDir}" ]] || print_error "Directory does not exist: ${sslDir}"
 
@@ -83,13 +84,13 @@ main() {
 
   # Now generate a full keystore with the client cert & key + trust certificates
   log "Generating full client keystore"
-  openssl pkcs12 \
-  -export \
-  -in "${clientCertFile}" \
-  -inkey "${clientKeyFile}" \
-  -out "${pcks12FullKeystoreFile}" \
-  -name "mysqlAlias" \
-  -passout pass:kspass -legacy
+  if [ubuntuVersion >= "18" ] ; then
+    openssl pkcs12 -export -in "${clientCertFile}" -inkey "${clientKeyFile}" -out "${pcks12FullKeystoreFile}" \
+    -name "mysqlAlias" -passout pass:kspass -legacy
+  else
+    openssl pkcs12 -export -in "${clientCertFile}" -inkey "${clientKeyFile}" -out "${pcks12FullKeystoreFile}" \
+    -name "mysqlAlias" -passout pass:kspass
+  fi
 
   # Clean up CSR file:
   rm "$clientReqFile"
