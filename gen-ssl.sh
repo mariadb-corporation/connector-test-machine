@@ -79,7 +79,7 @@ main() {
      -in "${clientReqFile}" \
      -out "${clientCertFile}" \
      -CA "${caCertFile}" \
-     -CAkey "${caKeyFile}"
+     -CAkey "${caKeyFile}" -days 365 -nodes
 
   # Now generate a full keystore with the client cert & key + trust certificates
   log "Generating full client keystore"
@@ -89,7 +89,7 @@ main() {
   -inkey "${clientKeyFile}" \
   -out "${pcks12FullKeystoreFile}" \
   -name "mysqlAlias" \
-  -passout pass:"kspass"
+  -passout pass:kspass
 
   # Clean up CSR file:
   rm "$clientReqFile"
