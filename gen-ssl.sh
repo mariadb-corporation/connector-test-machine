@@ -79,7 +79,7 @@ main() {
      -in "${clientReqFile}" \
      -out "${clientCertFile}" \
      -CA "${caCertFile}" \
-     -CAkey "${caKeyFile}" -days 365 -nodes
+     -CAkey "${caKeyFile}" -days 365
 
   # Now generate a full keystore with the client cert & key + trust certificates
   log "Generating full client keystore"
