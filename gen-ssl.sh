@@ -39,7 +39,6 @@ main() {
   local clientCertFile="${sslDir}/client.pem"
   local clientKeyFile="${sslDir}/client.key"
 
-  local tmpKeystoreFile=$(mktemp)
   local pcks12FullKeystoreFile="${sslDir}/fullclient-keystore.p12"
   local clientReqFile=$(mktemp)
 
@@ -82,16 +81,6 @@ main() {
      -CA "${caCertFile}" \
      -CAkey "${caKeyFile}"
 
-  # Now generate a keystore with the client cert & key
-  log "Generating client keystore"
-  openssl pkcs12 \
-  -export \
-  -in "${clientCertFile}" \
-  -inkey "${clientKeyFile}" \
-  -out "${tmpKeystoreFile}" \
-  -name "mysqlAlias" \
-  -passout pass:kspass
-
   # Now generate a full keystore with the client cert & key + trust certificates
   log "Generating full client keystore"
   openssl pkcs12 \
@@ -100,11 +89,10 @@ main() {
   -inkey "${clientKeyFile}" \
   -out "${pcks12FullKeystoreFile}" \
   -name "mysqlAlias" \
-  -passout pass:kspass
+  -passout pass:"kspass"
 
   # Clean up CSR file:
   rm "$clientReqFile"
-  rm "$tmpKeystoreFile"
 
   log "Generated key file and certificate in: ${sslDir}"
 }
