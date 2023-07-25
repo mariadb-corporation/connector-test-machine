@@ -8,6 +8,7 @@
 
 [maxscale]
 threads=auto
+users_refresh_time=0s
 
 # Server definitions
 #
