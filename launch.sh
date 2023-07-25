@@ -50,12 +50,14 @@ decrypt () {
     sudo apt-get update -y
     sudo apt-get install -y git-crypt
   fi
-
+  echo "decryption step  1"
   tee /tmp/key.hex <<<$CONNECTOR_TEST_SECRET_KEY
+  echo "decryption step  2"
   xxd -plain -revert /tmp/key.hex /tmp/key.txt
-
+  echo "decryption step  3"
   cd $PROJ_PATH
   git-crypt unlock /tmp/key.txt
+  echo "decryption done"
   cd ..
   export CONNECTOR_TEST_SECRET_KEY='removed'
   rm /tmp/key.txt
