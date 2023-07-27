@@ -331,6 +331,7 @@ launch_docker () {
 
     check_server_status 4006
     echo 'maxscale active !'
+    docker-compose -f ${COMPOSE_FILE} exec maxscale tail -n 500 /var/log/maxscale/maxscale.log
   fi
 
 }
