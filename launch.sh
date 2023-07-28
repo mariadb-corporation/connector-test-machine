@@ -230,11 +230,12 @@ check_server_status () {
 
 # launch docker instances
 launch_docker () {
+  echo "launch docker"
   export TEST_REQUIRE_TLS=0
   export TEST_DB_PORT=3305
   export ENTRYPOINT=$PROJ_PATH/travis/sql
   export ENTRYPOINT_PAM=$PROJ_PATH/travis/pam
-  if [ "$TYPE" == 'mariadb-es' ] ; then
+  if [ "$TYPE" == 'mariadb-es' ] || [ "$TYPE" == 'mariadb-es-test' ]; then
     export ENTRYPOINT=$PROJ_PATH/travis/sql-es
   fi
   export COMPOSE_FILE=$PROJ_PATH/travis/docker-compose.yml
@@ -271,7 +272,7 @@ launch_docker () {
   elif [ "$TYPE" == 'galera' ] ; then
       echo "launching galera"
       export COMPOSE_FILE=$PROJ_PATH/travis/galera-compose.yml
-  elif [ "$TYPE" == 'mariadb-es' ] && [ "$LOCAL" == "1" ]; then
+  elif [ "$TYPE" == 'mariadb-es-test' ] ; then
         echo "launching mariadb-es testing"
         export COMPOSE_FILE=$PROJ_PATH/travis/es-compose.yml
   elif  [ "$TYPE" == "xpand" ] ; then
@@ -478,6 +479,30 @@ case $TYPE in
           launch_docker
         fi
         ;;
+    mariadb-es-test)
+        if [ -z "$CONNECTOR_TEST_SECRET_KEY" ] ; then
+          echo "private environment variable CONNECTOR_TEST_SECRET_KEY must be provided for $TYPE"
+          exit 40
+        fi
+        if [ -z "$TEST_DB_DATABASE" ] ; then
+          echo "database must be provided for $TYPE"
+          exit 41
+        fi
+        export TEST_DB_PASSWORD=$'heyPassw-!*20oRd'
+        decrypt
+
+        mapfile ES_TOKEN < $PROJ_PATH/secretdir/mariadb-es-token.txt
+        sudo apt-get update
+        sudo apt-get install apt-transport-https ca-certificates gnupg curl sudo
+        echo "deb https://packages.cloud.google.com/apt cloud-sdk main" | sudo tee -a /etc/apt/sources.list.d/google-cloud-sdk.list
+        wget https://packages.cloud.google.com/apt/doc/apt-key.gpg && sudo apt-key add apt-key.gpg
+        sudo apt-get update
+        gcloud auth activate-service-account docker-registry-pull@downloads-234321.iam.gserviceaccount.com --key-file=$PROJ_PATH/secretdir/downloads-234321.json
+        gcloud auth print-access-token | sudo docker login -u oauth2accesstoken --password-stdin gcr.io
+        sudo docker pull gcr.io/downloads-234321/es-server-test:23.06
+        generate_ssl
+        launch_docker
+        ;;
 
     mariadb-es)
         if [ -z "$CONNECTOR_TEST_SECRET_KEY" ] ; then
@@ -492,27 +517,17 @@ case $TYPE in
         decrypt
 
         mapfile ES_TOKEN < $PROJ_PATH/secretdir/mariadb-es-token.txt
-        if [ "$LOCAL" == "1" ] ; then
-          sudo apt-get install apt-transport-https ca-certificates gnupg curl sudo
-          echo "deb [signed-by=/usr/share/keyrings/cloud.google.gpg] https://packages.cloud.google.com/apt cloud-sdk main" | sudo tee -a /etc/apt/sources.list.d/google-cloud-sdk.list
-          curl https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo tee /usr/share/keyrings/cloud.google.gpg
-          sudo apt-get update && sudo apt-get install google-cloud-cli
-          gcloud services enable containerregistry.googleapis.com
-          docker login docker.mariadb.com --username diego.dupin@mariadb.com --password $ES_TOKEN
-          docker pull gcr.io/downloads-234321/es-server-test:23.06
+        docker login docker.mariadb.com --username diego.dupin@mariadb.com --password $ES_TOKEN
+        if [ -z "$VERSION" ] ; then
+          docker pull docker.mariadb.com/enterprise-server
+          export TYPE_VERS=$"docker.mariadb.com/enterprise-server"
         else
-          docker login docker.mariadb.com --username diego.dupin@mariadb.com --password $ES_TOKEN
-          if [ -z "$VERSION" ] ; then
-            docker pull docker.mariadb.com/enterprise-server
-            export TYPE_VERS=$"docker.mariadb.com/enterprise-server"
-          else
-            docker pull docker.mariadb.com/enterprise-server:$VERSION
-            export TYPE_VERS=$"docker.mariadb.com/enterprise-server:$VERSION"
-          fi
-
-          generate_ssl
-          launch_docker
+          docker pull docker.mariadb.com/enterprise-server:$VERSION
+          export TYPE_VERS=$"docker.mariadb.com/enterprise-server:$VERSION"
         fi
+
+        generate_ssl
+        launch_docker
         ;;
 
     build)
