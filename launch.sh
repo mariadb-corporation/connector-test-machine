@@ -272,9 +272,6 @@ launch_docker () {
   elif [ "$TYPE" == 'galera' ] ; then
       echo "launching galera"
       export COMPOSE_FILE=$PROJ_PATH/travis/galera-compose.yml
-  elif [ "$TYPE" == 'mariadb-es-test' ] ; then
-        echo "launching mariadb-es testing"
-        export COMPOSE_FILE=$PROJ_PATH/travis/es-compose.yml
   elif  [ "$TYPE" == "xpand" ] ; then
     # connect to test database
     echo "launching xpand"
@@ -501,6 +498,7 @@ case $TYPE in
         gcloud auth print-access-token | sudo docker login -u oauth2accesstoken --password-stdin gcr.io
         sudo docker pull gcr.io/downloads-234321/es-server-test:$VERSION
         generate_ssl
+        export TYPE_VERS=$"gcr.io/downloads-234321/es-server-test:$VERSION"
         launch_docker
         ;;
 
