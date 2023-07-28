@@ -499,7 +499,7 @@ case $TYPE in
         sudo apt-get update
         gcloud auth activate-service-account docker-registry-pull@downloads-234321.iam.gserviceaccount.com --key-file=$PROJ_PATH/secretdir/downloads-234321.json
         gcloud auth print-access-token | sudo docker login -u oauth2accesstoken --password-stdin gcr.io
-        sudo docker pull gcr.io/downloads-234321/es-server-test:23.06
+        sudo docker pull gcr.io/downloads-234321/es-server-test:$VERSION
         generate_ssl
         launch_docker
         ;;
