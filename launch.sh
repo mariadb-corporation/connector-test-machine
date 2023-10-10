@@ -167,6 +167,10 @@ install_local () {
       sudo sh -c "echo 'pam_use_cleartext_plugin=ON' >> /etc/mysql/conf.d/unix.cnf"
     fi
 
+    if [ "$QUERY_CACHE" == "1" ] ; then
+      sudo sh -c "echo 'query_cache_type=1' >> /etc/mysql/conf.d/unix.cnf"
+    fi
+
     sudo ls -lrt /etc/mysql/conf.d/
     sudo chmod +xr /etc/mysql/conf.d/unix.cnf
     tail /etc/mysql/conf.d/unix.cnf
@@ -346,7 +350,7 @@ export PROJ_PATH="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pw
 echo "parsing parameters"
 
 PACKET_SIZE=20
-while getopts ":t:v:d:n:l:p:g:c:" flag; do
+while getopts ":t:v:d:n:l:p:g:q:c:" flag; do
     case "${flag}" in
         t) TYPE=${OPTARG};;
         v) VERSION=${OPTARG};;
@@ -355,6 +359,7 @@ while getopts ":t:v:d:n:l:p:g:c:" flag; do
         l) LOCAL=${OPTARG};;
         p) PACKET_SIZE=${OPTARG};;
         g) DEBUG=${OPTARG};;
+        q) QUERY_CACHE=${OPTARG};;
         c) CLEAR_TEXT=${OPTARG};;
         s) DISABLE_SSL=${OPTARG};;
     esac
@@ -381,6 +386,11 @@ if [ -z "$DEBUG" ] ; then
   DEBUG="1"
 fi
 
+if [ -z "$QUERY_CACHE" ] ; then
+  QUERY_CACHE="1"
+fi
+
+
 if [ "$TYPE" == "build" ] ; then
   VERSION="10.9"
 fi
@@ -396,6 +406,8 @@ echo "PROJ_PATH: ${PROJ_PATH}"
 echo "PACKET_SIZE: ${PACKET_SIZE}"
 echo "CLEAR_TEXT: ${CLEAR_TEXT}"
 echo "DISABLE_SSL: ${DISABLE_SSL}"
+echo "QUERY_CACHE: ${QUERY_CACHE}"
+
 if [ -z "$CONNECTOR_TEST_SECRET_KEY" ] ; then
   echo "CONNECTOR_TEST_SECRET_KEY env not set"
 else
