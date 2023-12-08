@@ -5,6 +5,7 @@ stages:
     if: type = push AND fork = false
   - Community
   - Language
+  - Benchmarks
 
 jobs:
   fast_finish: true
