@@ -4,6 +4,7 @@ stages:
   - name: Enterprise
     if: type = push AND fork = false
   - Community
+  - Language
 
 jobs:
   fast_finish: true
