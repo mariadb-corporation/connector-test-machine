@@ -26,6 +26,7 @@ stages:
   - name: Enterprise
     if: type = push AND fork = false
   - Community
+  - Other
   - name: Benchmarks
     if: type = push AND fork = false
 
