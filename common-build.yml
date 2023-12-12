@@ -1,11 +1,33 @@
+os: linux
+dist: jammy
+services: docker
+addons:
+  hosts:
+    - mariadb.example.com
+    - mariadb1.example.com
+    - mariadb2.example.com
+    - mariadb3.example.com
+
+install:
+  - git clone https://github.com/mariadb-corporation/connector-test-machine.git
+  - |-
+    case $TRAVIS_OS_NAME in
+      windows)
+        connector-test-machine/launch.bat -t "$srv" -v "$v" -d "$DB"
+        ;;
+      linux)
+        source connector-test-machine/launch.sh -t "$srv" -v "$v" -d "$DB" -l "$local" -c "$CLEAR_TEXT" -p "$packet"
+        ;;
+    esac
 
 stages:
   - Minimal
+  - Language
   - name: Enterprise
     if: type = push AND fork = false
   - Community
-  - Language
-  - Benchmarks
+  - name: Benchmarks
+    if: type = push AND fork = false
 
 jobs:
   fast_finish: true
@@ -34,7 +56,7 @@ jobs:
       if: type = push AND fork = false
     - stage: Enterprise
       env: srv=maxscale
-      name: "Maxscale docker latest"
+      name: "Maxscale"
 
     - stage: Community
       env: srv=mariadb v=10.6
@@ -65,3 +87,7 @@ jobs:
       name: "MySQL 8.0"
     - env: srv=build
       name: "CS build"
+
+
+after_failure:
+  - if [ "$srv" == "maxscale" ] ; then docker-compose -f ${COMPOSE_FILE} exec -u root maxscale tail -500 /var/log/maxscale/maxscale.log; fi
