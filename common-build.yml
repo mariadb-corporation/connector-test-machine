@@ -68,10 +68,12 @@ jobs:
       env: srv=mariadb v=10.4 local=1
       dist: bionic
       name: "CS 10.4"
+      node_js: 16
     - stage: Community
       env: srv=mariadb v=10.5 local=1 DISABLE_SSL=1
       dist: bionic
       name: "CS 10.5"
+      node_js: 16
     - env: srv=mariadb v=10.11 local=1
       name: "CS 10.11"
     - env: srv=mariadb v=11.0 local=1
