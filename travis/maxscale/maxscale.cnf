@@ -60,7 +60,7 @@ router_options=slave
 type=service
 router=readwritesplit
 servers=server1
-version_string=10.6.99-MariaDB-maxScale-6.1.4
+#version_string=10.6.99-MariaDB-maxScale-6.1.4
 user=boby
 password=heyPassword
 
@@ -68,7 +68,7 @@ password=heyPassword
 type=service
 router=readwritesplit
 servers=server1
-version_string=10.6.99-MariaDB-maxScale-6.1.4
+#version_string=10.6.99-MariaDB-maxScale-6.1.4
 user=boby
 password=heyPassword
 
