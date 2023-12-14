@@ -46,7 +46,7 @@ RUN set -ex; \
 	; \
 	rm -rf /var/lib/apt/lists/*
 
-ARG GPG_KEYS=177F4010FE56CA3336300305F1656F24C74CD1D8
+ARG GPG_KEYS=B42F6819007F00F88E364FD4036A9C25BF357DD4
 # pub   rsa4096 2016-03-30 [SC]
 #         177F 4010 FE56 CA33 3630  0305 F165 6F24 C74C D1D8
 # uid           [ unknown] MariaDB Signing Key <signing-key@mariadb.org>
@@ -63,9 +63,9 @@ RUN set -ex; \
 	apt-key list
 
 # bashbrew-architectures: amd64 arm64v8 ppc64le
-ARG MARIADB_MAJOR=10.10
+ARG MARIADB_MAJOR=11.3
 ENV MARIADB_MAJOR $MARIADB_MAJOR
-ARG MARIADB_VERSION=1:10.10.1+maria~focal
+ARG MARIADB_VERSION=1:11.3.1+maria~focal
 ENV MARIADB_VERSION $MARIADB_VERSION
 # release-status:Stable
 # (https://downloads.mariadb.org/mariadb/+releases/)
