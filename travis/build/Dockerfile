@@ -65,7 +65,7 @@ RUN set -ex; \
 # bashbrew-architectures: amd64 arm64v8 ppc64le
 ARG MARIADB_MAJOR=11.3
 ENV MARIADB_MAJOR $MARIADB_MAJOR
-ARG MARIADB_VERSION=1:11.3.1+maria~focal
+ARG MARIADB_VERSION=1:11.3.2+maria~focal
 ENV MARIADB_VERSION $MARIADB_VERSION
 # release-status:Stable
 # (https://downloads.mariadb.org/mariadb/+releases/)
@@ -103,7 +103,7 @@ RUN chmod 777 /root/*
 RUN dpkg --install /root/mysql-common*
 RUN dpkg --install /root/mariadb-common*
 RUN dpkg -R --unpack /root/
-RUN apt-get install -f -y
+RUN apt-get -o Debug::pkgProblemResolver=true install -f -y
 
 RUN apt-get install -y \
 # mariadb-backup is installed at the same time so that `mysql-common` is only installed once from just mariadb repos
