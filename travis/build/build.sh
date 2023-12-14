@@ -7,7 +7,7 @@ echo "**************************************************************************
 wget -q -o /dev/null index.html https://buildbot.mariadb.net/archive/pack/11.3/
 grep -o ">build-[0-9]*" index.html | grep -o "[0-9]*" | tac | while read -r line ; do
 
-  curl -s --head https://buildbot.mariadb.net/archive/pack/11.3/build-$line/kvm-deb-jammy-amd64/md5sums.txt | head -n 1 | grep "HTTP/1.[01] [23].." > /dev/null
+  curl -s --head https://buildbot.mariadb.net/archive/pack/11.3/build-$line/kvm-deb-jammy-amd64/md5sums.txt | head -n 1 | grep "HTTP/2 [23].." > /dev/null
   if [ $? = "0" ]; then
     echo "**************************************************************************"
     echo "* Processing $line"
