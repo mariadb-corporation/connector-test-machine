@@ -41,6 +41,7 @@ RUN set -ex; \
 		libjemalloc2 \
 		pwgen \
 		tzdata \
+        libc6 \
 		xz-utils \
 		zstd \
 	; \
