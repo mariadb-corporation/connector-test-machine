@@ -94,7 +94,7 @@ RUN set -ex; \
 	apt-get update;
 
 
-RUN apt-get install -y curl libdbi-perl rsync socat libnuma1 libaio1 zlib1g-dev libreadline5 libjemalloc2 libsnappy1v5 libcrack2 apt-utils
+RUN apt-get install -y curl libdbi-perl rsync socat libnuma1 libaio1 zlib1g-dev libreadline8 libjemalloc2 libsnappy1v5 libcrack2 apt-utils
 
 #RUN apt-get install -y galera4
 
