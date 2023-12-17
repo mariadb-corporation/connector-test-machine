@@ -201,7 +201,7 @@ install_local () {
 }
 
 check_server_status () {
-  if [[ $VERSION = 11* ]] ; then
+  if [ "$TYPE" == "mariadb" ] && [ "$LOCAL" == "1" ] ; then
     mysqlCmd=( mariadb --protocol=TCP -u${TEST_DB_USER} --port=${1} ${TEST_DB_DATABASE} --password=${TEST_DB_PASSWORD})
   else
     mysqlCmd=( mysql --protocol=TCP -u${TEST_DB_USER} --port=${1} ${TEST_DB_DATABASE} --password=${TEST_DB_PASSWORD})
@@ -392,9 +392,7 @@ fi
 
 
 if [ "$TYPE" == "build" ] ; then
-  # keep 10.6 in order to keep mysql command line installed by default on travis
-  # to verify that server is active
-  VERSION="10.6"
+  VERSION="11.3"
 fi
 
 echo "parameters:"
