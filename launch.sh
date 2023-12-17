@@ -392,7 +392,9 @@ fi
 
 
 if [ "$TYPE" == "build" ] ; then
-  VERSION="11.3"
+  # keep 10.6 in order to keep mysql command line installed by default on travis
+  # to verify that server is active
+  VERSION="10.6"
 fi
 
 echo "parameters:"
