@@ -89,7 +89,7 @@ type=listener
 service=Read-Write-Service
 protocol=MariaDBClient
 port=4006
-connection_metadata=redirect_url=auto
+connection_metadata=redirect_url=auto,maxscale=23.08
 
 [Read-Write-Listener2]
 type=listener
