@@ -84,8 +84,6 @@ jobs:
       name: "CS 11.2"
     - env: srv=mariadb v=11.2 local=1
       name: "CS 11.3"
-    - env: srv=mysql v=5.7
-      name: "MySQL 5.7"
     - env: srv=mysql v=8.0
       name: "MySQL 8.0"
     - env: srv=build
