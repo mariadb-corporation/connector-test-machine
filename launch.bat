@@ -41,6 +41,7 @@ if "%d%"=="" (
 choco install curl
 powershell Install-WindowsFeature Net-Framework-Core
 choco install wixtoolset
+RefreshEnv.cmd
 
 call connector-test-machine/travis/windows-download.bat %v%
 msiexec /i server.msi INSTALLDIR=c:\projects\server SERVICENAME=mariadb ALLOWREMOTEROOTACCESS=true /qn
