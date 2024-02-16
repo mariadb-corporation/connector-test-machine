@@ -39,10 +39,6 @@ if "%d%"=="" (
 
 
 choco install curl
-powershell Install-WindowsFeature Net-Framework-Core
-choco install wixtoolset
-echo "refresh environment"
-refreshenv
 
 echo "searching msi"
 call connector-test-machine/travis/windows-download.bat %v%
@@ -80,3 +76,8 @@ echo export TEST_REQUIRE_TLS=0 >> settestenv.sh
 
 dir .
 
+powershell Install-WindowsFeature Net-Framework-Core
+choco install wixtoolset
+echo "refresh environment"
+refreshenv
+echo "after refresh environment"
