@@ -15,7 +15,7 @@ install:
       windows)
         connector-test-machine/launch.bat -t "$srv" -v "$v" -d "$DB"
         # Since refreshenv doesn't seem to work, we set this manually
-        export WIX="/c/Program Files (x86)/WiX Toolset v3.11/bin"
+        export WIX="/c/Program Files (x86)/WiX Toolset v3.11"
         ;;
       linux)
         source connector-test-machine/launch.sh -t "$srv" -v "$v" -d "$DB" -l "$local" -c "$CLEAR_TEXT" -p "$packet"
