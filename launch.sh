@@ -305,7 +305,7 @@ launch_docker () {
   if [ "$TYPE" == "mariadb" ] ; then
 
     export TEST_PAM_USER=testPam
-    export TEST_PAM_PWD=myPwd
+    export TEST_PAM_PWD=myPwdTest
     echo 'add PAM user'
     # execute pam
     docker-compose -f ${COMPOSE_FILE} exec -u root db bash /pam/pam.sh

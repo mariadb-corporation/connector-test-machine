@@ -2,7 +2,7 @@
 
 useradd testPam
 chpasswd  << EOF
-testPam:myPwd
+testPam:myPwdTest
 EOF
 
 echo "pam user added"

@@ -8,7 +8,7 @@ EOF
 
 useradd testPam
 chpasswd  << EOF
-testPam:myPwd
+testPam:myPwdTest
 EOF
 
 usermod -a -G shadow mysql
