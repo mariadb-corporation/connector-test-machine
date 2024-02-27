@@ -160,11 +160,18 @@ install_local () {
     fi
     sudo sh -c "echo 'max_allowed_packet=${PACKET_SIZE}M' >> /etc/mysql/conf.d/unix.cnf"
     sudo sh -c "echo 'innodb_log_file_size=${PACKET_SIZE}0M' >> /etc/mysql/conf.d/unix.cnf"
-    if [ "$CLEAR_TEXT" == "1" ] ; then
-      echo "adding pam_use_cleartext_plugin in conf"
+    if [ "$TYPE" == "mariadb" ] ; then
       sudo sh -c "echo '[mariadb]' >> /etc/mysql/conf.d/unix.cnf"
       sudo sh -c "echo 'plugin_load_add=auth_pam' >> /etc/mysql/conf.d/unix.cnf"
-      sudo sh -c "echo 'pam_use_cleartext_plugin=ON' >> /etc/mysql/conf.d/unix.cnf"
+
+      if [ "$CLEAR_TEXT" == "1" ] ; then
+        echo "adding pam_use_cleartext_plugin in conf"
+        sudo sh -c "echo 'pam_use_cleartext_plugin=ON' >> /etc/mysql/conf.d/unix.cnf"
+      fi
+      export TEST_PAM_USER=testPam
+      export TEST_PAM_PWD=myPwd
+      echo 'add PAM user'
+      sudo bash $PROJ_PATH/travis/pam/pam.sh
     fi
 
     if [ "$QUERY_CACHE" == "1" ] ; then
@@ -174,13 +181,6 @@ install_local () {
     sudo ls -lrt /etc/mysql/conf.d/
     sudo chmod +xr /etc/mysql/conf.d/unix.cnf
     tail /etc/mysql/conf.d/unix.cnf
-
-#    if [ "$TYPE" == "mariadb" ] ; then
-#      export TEST_PAM_USER=testPam
-#      export TEST_PAM_PWD=myPwd
-#      echo 'add PAM user'
-#      sudo bash $PROJ_PATH/travis/pam/pam.sh
-#    fi
 
     echo "restart mariadb server"
     sudo service mariadb restart
