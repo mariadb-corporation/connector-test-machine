@@ -169,7 +169,7 @@ install_local () {
         sudo sh -c "echo 'pam_use_cleartext_plugin=ON' >> /etc/mysql/conf.d/unix.cnf"
       fi
       export TEST_PAM_USER=testPam
-      export TEST_PAM_PWD=myPwd
+      export TEST_PAM_PWD=myPwdTest
       echo 'add PAM user'
       sudo bash $PROJ_PATH/travis/pam/pam.sh
     fi
