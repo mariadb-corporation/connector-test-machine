@@ -256,8 +256,10 @@ launch_docker () {
     else
       export ADDITIONAL_CONF="--caching-sha2-password-private-key-path=/etc/sslcert/server.key --caching-sha2-password-public-key-path=/etc/sslcert/public.key --sha256-password-public-key-path=/etc/sslcert/public.key --sha256-password-private-key-path=/etc/sslcert/server.key"
     fi
-    if [ -z "$NATIVE" ] || [ "$NATIVE" == 1 ] ; then
-      export ADDITIONAL_CONF="--default-authentication-plugin=mysql_native_password $ADDITIONAL_CONF"
+    if [ "$VERSION" <= 8.4 ] ; then
+      if [ -z "$NATIVE" ] || [ "$NATIVE" == 1 ] ; then
+        export ADDITIONAL_CONF="--default-authentication-plugin=mysql_native_password $ADDITIONAL_CONF"
+      fi
     fi
     echo "Additional conf : $ADDITIONAL_CONF"
   fi
