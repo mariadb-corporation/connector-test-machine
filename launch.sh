@@ -10,6 +10,8 @@ set -o pipefail
 generate_ssl () {
   openssl version -a
   sudo apt-get install openssl
+  sudo apt-get install libnet-ssleay-perl
+  sudo apt-get install libcrypt-ssleay-perl
   openssl version -a
   ls -lrt /etc/ssl
   sudo mkdir -p /etc/ssl/mariadb
