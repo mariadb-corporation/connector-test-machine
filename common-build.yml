@@ -80,14 +80,15 @@ jobs:
       node_js: 16
     - env: srv=mariadb v=10.11 local=1
       name: "CS 10.11"
-    - env: srv=mariadb v=11.0 local=1
-      name: "CS 11.0"
     - env: srv=mariadb v=11.1 local=1
       name: "CS 11.1"
     - env: srv=mariadb v=11.2 local=1 CLEAR_TEXT=1
       name: "CS 11.2"
     - env: srv=mariadb v=11.4 local=1
       name: "CS 11.4"
+    - env: srv=mariadb v=11.5-rc
+      dist: noble
+      name: "CS 11.5 - noble"
     - env: srv=mysql v=8.4
       name: "MySQL 8.4"
     - env: srv=build
