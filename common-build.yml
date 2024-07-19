@@ -67,12 +67,7 @@ jobs:
       env: srv=mariadb v=11.4
       os: windows
       language: shell
-      name: "CS 10.6 - Windows"
-    - stage: Community
-      env: srv=mariadb v=10.4 local=1
-      dist: bionic
-      name: "CS 10.4"
-      node_js: 16
+      name: "CS 11.4 - Windows"
     - stage: Community
       env: srv=mariadb v=10.5 local=1
       dist: bionic
