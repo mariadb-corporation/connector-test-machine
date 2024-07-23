@@ -549,7 +549,7 @@ case $TYPE in
           echo "database must be provided for $TYPE"
           exit 50
         fi
-        docker_login
+        #docker_login
 
         /bin/bash $PROJ_PATH/travis/build/build.sh
 #        if [ "$DEBUG" == "1" ] ; then
