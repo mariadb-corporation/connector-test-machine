@@ -208,6 +208,7 @@ check_server_status () {
   else
     mysqlCmd=( mysql --protocol=TCP -u${TEST_DB_USER} --port=${1} ${TEST_DB_DATABASE} --password=${TEST_DB_PASSWORD})
   fi
+  echo "check status using user TEST_DB_USER=${TEST_DB_USER}"
   for i in {15..0}; do
     if echo 'SELECT 1' | "${mysqlCmd[@]}" &> /dev/null; then
         break
