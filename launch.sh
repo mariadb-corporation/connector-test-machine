@@ -537,11 +537,13 @@ case $TYPE in
           docker pull docker.mariadb.com/enterprise-server
           export TYPE_VERS=$"docker.mariadb.com/enterprise-server"
         else
-          docker pull docker.mariadb.com/enterprise-server:$VERSION
-          export TYPE_VERS=$"docker.mariadb.com/enterprise-server:$VERSION"
+
           if ["$VERSION" == "10.6"] ; then
-            export TYPE_VERS=$"docker.mariadb.com/enterprise-server:@sha256:f4ff9e962fc15ed8ad2bfaec81fb0d406a0bb63ee9750861214998225ffa0db6"
-          fi
+            docker pull docker.mariadb.com/enterprise-server:@sha256:f4ff9e962fc15ed8ad2bfaec81fb0d406a0bb63ee9750861214998225ffa0db6
+          else
+            docker pull docker.mariadb.com/enterprise-server:$VERSION
+         fi
+          export TYPE_VERS=$"docker.mariadb.com/enterprise-server:$VERSION"
         fi
 
         generate_ssl

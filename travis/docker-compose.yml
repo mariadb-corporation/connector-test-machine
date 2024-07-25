@@ -8,7 +8,7 @@ services:
     volumes:
       - /etc/ssl/mariadb:/etc/sslcert
       - $ENTRYPOINT:/docker-entrypoint-initdb.d
-      - $ENTRYPOINT:/es-initdb.d
+#      - $ENTRYPOINT:/es-initdb.d
       - $ENTRYPOINT_PAM:/pam
     environment:
       MARIADB_USER: $TEST_DB_USER
