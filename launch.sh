@@ -545,9 +545,15 @@ case $TYPE in
             docker pull docker.mariadb.com/enterprise-server@sha256:f4ff9e962fc15ed8ad2bfaec81fb0d406a0bb63ee9750861214998225ffa0db6
             export TYPE_VERS=$"docker.mariadb.com/enterprise-server@sha256:f4ff9e962fc15ed8ad2bfaec81fb0d406a0bb63ee9750861214998225ffa0db6"
           else
-            echo "loading ES version with numbering"
-            docker pull docker.mariadb.com/enterprise-server:$VERSION
-            export TYPE_VERS=$"docker.mariadb.com/enterprise-server:$VERSION"
+            if [[ "$VERSION" == "10.5" ]] ; then
+              echo "using @sha256:549c745081a461a5597a5dc2bcda46dc63ba6851cf0269f15c91773522ab16b7 in place of latest 10.5"
+              docker pull docker.mariadb.com/enterprise-server@sha256:549c745081a461a5597a5dc2bcda46dc63ba6851cf0269f15c91773522ab16b7
+              export TYPE_VERS=$"docker.mariadb.com/enterprise-server@sha256:549c745081a461a5597a5dc2bcda46dc63ba6851cf0269f15c91773522ab16b7"
+            else
+              echo "loading ES version with numbering"
+              docker pull docker.mariadb.com/enterprise-server:$VERSION
+              export TYPE_VERS=$"docker.mariadb.com/enterprise-server:$VERSION"
+            fi
           fi
         fi
 
