@@ -533,16 +533,19 @@ case $TYPE in
 
         mapfile ES_TOKEN < $PROJ_PATH/secretdir/mariadb-es-token.txt
         docker login docker.mariadb.com --username diego.dupin@mariadb.com --password $ES_TOKEN
+
         if [ -z "$VERSION" ] ; then
+          echo "loading latest ES version"
           docker pull docker.mariadb.com/enterprise-server
           export TYPE_VERS=$"docker.mariadb.com/enterprise-server"
         else
-
+          echo "loading ES version with VERSION=$VERSION"
           if ["$VERSION" == "10.6"] ; then
             echo "using @sha256:f4ff9e962fc15ed8ad2bfaec81fb0d406a0bb63ee9750861214998225ffa0db6 in place of latest 10.6"
             docker pull docker.mariadb.com/enterprise-server:@sha256:f4ff9e962fc15ed8ad2bfaec81fb0d406a0bb63ee9750861214998225ffa0db6
             export TYPE_VERS=$"docker.mariadb.com/enterprise-server:@sha256:f4ff9e962fc15ed8ad2bfaec81fb0d406a0bb63ee9750861214998225ffa0db6"
           else
+            echo "loading ES version with numbering"
             docker pull docker.mariadb.com/enterprise-server:$VERSION
             export TYPE_VERS=$"docker.mariadb.com/enterprise-server:$VERSION"
           fi
