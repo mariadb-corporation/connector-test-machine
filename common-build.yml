@@ -87,6 +87,8 @@ jobs:
       name: "CS 11.6 - noble"
     - env: srv=mysql v=8.4
       name: "MySQL 8.4"
+    - env: srv=mysql v=9.0
+      name: "MySQL 9.0"
     - env: srv=build
       name: "CS build"
 
