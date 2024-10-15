@@ -48,12 +48,12 @@ jobs:
       if: type = push AND fork = false
 
     - stage: Enterprise
-      env: srv=mariadb-es v=10.4
-      name: "ES 10.4"
-      if: type = push AND fork = false
-    - stage: Enterprise
       env: srv=mariadb-es v=10.5
       name: "ES 10.5"
+      if: type = push AND fork = false
+    - stage: Enterprise
+      env: srv=mariadb-es v=10.6
+      name: "ES 10.6"
       if: type = push AND fork = false
     - stage: Enterprise
       env: srv=mariadb-es v=23.08
