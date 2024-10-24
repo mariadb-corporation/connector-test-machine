@@ -56,6 +56,10 @@ jobs:
 #      name: "ES 23.08"
 #      if: type = push AND fork = false
     - stage: Enterprise
+      env: srv=mariadb-es-test v=11.4
+      name: "ES 11.4 preview"
+      if: type = push AND fork = false
+    - stage: Enterprise
       env: srv=maxscale
       name: "Maxscale"
 
