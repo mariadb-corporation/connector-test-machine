@@ -45,22 +45,22 @@ jobs:
     - stage: Minimal
       env: srv=mariadb-es v=10.6
       name: "ES 10.6"
+      dist: jammy
       if: type = push AND fork = false
 
     - stage: Enterprise
       env: srv=mariadb-es v=10.5
       name: "ES 10.5"
+      dist: jammy
       if: type = push AND fork = false
-#    - stage: Enterprise
-#      env: srv=mariadb-es v=23.08
-#      name: "ES 23.08"
-#      if: type = push AND fork = false
     - stage: Enterprise
       env: srv=mariadb-es-test v=11.4
+      dist: jammy
       name: "ES 11.4 preview"
       if: type = push AND fork = false
     - stage: Enterprise
       env: srv=maxscale
+      dist: jammy
       name: "Maxscale"
 
     - stage: Community
@@ -74,10 +74,13 @@ jobs:
       name: "CS 10.5"
       node_js: 16
     - env: srv=mariadb v=10.11 local=1
+      dist: jammy
       name: "CS 10.11"
     - env: srv=mariadb v=11.2 local=1 CLEAR_TEXT=1
+      dist: jammy
       name: "CS 11.2"
     - env: srv=mariadb v=11.4 local=1
+      dist: jammy
       name: "CS 11.4"
     - env: srv=mariadb v=11.5
       name: "CS 11.5"
