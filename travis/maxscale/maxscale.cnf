@@ -9,6 +9,7 @@
 [maxscale]
 threads=auto
 users_refresh_time=0s
+max_auth_errors_until_block=0
 
 # Server definitions
 #
