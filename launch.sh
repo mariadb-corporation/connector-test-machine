@@ -117,12 +117,19 @@ install_repo () {
   if [ "$TRAVIS_OS_NAME" == "linux" ]  ; then
     # remove mysql if present
     remove_mysql
+    sudo apt-get install apt-transport-https curl
+    sudo mkdir -p /etc/apt/keyrings
+    sudo curl -o /etc/apt/keyrings/mariadb-keyring.pgp 'https://mariadb.org/mariadb_release_signing_key.pgp'
+    sudo /etc/apt/sources.list.d/mariadb.sources
 
-    sudo apt-get install software-properties-common dirmngr apt-transport-https
-    sudo apt-key adv --fetch-keys 'https://mariadb.org/mariadb_release_signing_key.asc'
-    sudo apt-key adv --recv-keys --keyserver hkp://keyserver.ubuntu.com:80 F1656F24C74CD1D8
-    sudo add-apt-repository -y "deb [arch=amd64,arm64,ppc64el,s390x] https://mirror.rackspace.com/mariadb/repo/${VERSION}/ubuntu ${TRAVIS_DIST} main"
-    sudo apt update
+    sudo sh -c "echo 'X-Repolib-Name: MariaDB' >> /etc/apt/sources.list.d/mariadb.sources"
+    sudo sh -c "echo 'Types: deb' >> /etc/apt/sources.list.d/mariadb.sources"
+    sudo sh -c "echo 'URIs: https://mariadb.gb.ssimn.org/repo/${VERSION}/ubuntu' >> /etc/apt/sources.list.d/mariadb.sources"
+    sudo sh -c "echo 'Suites: ${TRAVIS_DIST}' >> /etc/apt/sources.list.d/mariadb.sources"
+    sudo sh -c "echo 'Components: main main/debug' >> /etc/apt/sources.list.d/mariadb.sources"
+    sudo sh -c "echo 'Signed-By: /etc/apt/keyrings/mariadb-keyring.pgp' >> /etc/apt/sources.list.d/mariadb.sources"
+    sudo apt-get update
+
     echo "mariadb-server-${VERSION} mysql-server/root_password password ${TEST_DB_PASSWORD}" | sudo debconf-set-selections
     echo "mariadb-server-${VERSION} mysql-server/root_password_again password ${TEST_DB_PASSWORD}" | sudo debconf-set-selections
   fi
