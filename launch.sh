@@ -120,7 +120,8 @@ install_repo () {
     sudo apt-get install apt-transport-https curl
     sudo mkdir -p /etc/apt/keyrings
     sudo curl -o /etc/apt/keyrings/mariadb-keyring.pgp 'https://mariadb.org/mariadb_release_signing_key.pgp'
-    sudo /etc/apt/sources.list.d/mariadb.sources
+
+    sudo touch /etc/apt/sources.list.d/mariadb.sources
 
     sudo sh -c "echo 'X-Repolib-Name: MariaDB' >> /etc/apt/sources.list.d/mariadb.sources"
     sudo sh -c "echo 'Types: deb' >> /etc/apt/sources.list.d/mariadb.sources"
@@ -128,6 +129,9 @@ install_repo () {
     sudo sh -c "echo 'Suites: ${TRAVIS_DIST}' >> /etc/apt/sources.list.d/mariadb.sources"
     sudo sh -c "echo 'Components: main main/debug' >> /etc/apt/sources.list.d/mariadb.sources"
     sudo sh -c "echo 'Signed-By: /etc/apt/keyrings/mariadb-keyring.pgp' >> /etc/apt/sources.list.d/mariadb.sources"
+
+    sudo tail /etc/apt/sources.list.d/mariadb.sources
+
     sudo apt-get update
 
     echo "mariadb-server-${VERSION} mysql-server/root_password password ${TEST_DB_PASSWORD}" | sudo debconf-set-selections
