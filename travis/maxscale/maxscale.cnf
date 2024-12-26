@@ -113,3 +113,9 @@ authenticator=PAMAuth
 [Hint]
 type=filter
 module=hintfilter
+
+[InjectVersion]
+type=filter
+module=regexfilter
+match=SELECT maxscale_version()
+replace=SELECT 240204
