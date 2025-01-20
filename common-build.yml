@@ -54,7 +54,7 @@ jobs:
       dist: jammy
       if: type = push AND fork = false
     - stage: Enterprise
-      env: srv=mariadb-es-test v=11.4
+      env: srv=mariadb-es v=11.4
       dist: jammy
       name: "ES 11.4 preview"
       if: type = push AND fork = false
