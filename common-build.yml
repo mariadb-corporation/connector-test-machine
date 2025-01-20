@@ -56,7 +56,7 @@ jobs:
     - stage: Enterprise
       env: srv=mariadb-es v=11.4
       dist: jammy
-      name: "ES 11.4 preview"
+      name: "ES 11.4"
       if: type = push AND fork = false
     - stage: Enterprise
       env: srv=maxscale
