@@ -73,19 +73,16 @@ jobs:
       dist: bionic
       name: "CS 10.5"
       node_js: 16
-    - env: srv=mariadb v=10.11 local=1
+    - env: srv=mariadb v=10.11 local=1 CLEAR_TEXT=1
       dist: jammy
       name: "CS 10.11"
-    - env: srv=mariadb v=11.2 local=1 CLEAR_TEXT=1
-      dist: jammy
-      name: "CS 11.2"
     - env: srv=mariadb v=11.4 local=1
       dist: jammy
       name: "CS 11.4"
-    - env: srv=mariadb v=11.5
-      name: "CS 11.5"
-    - env: srv=mariadb v=11.6-rc
+    - env: srv=mariadb v=11.6
       name: "CS 11.6"
+    - env: srv=mariadb v=11.7-rc
+      name: "CS 11.7-rc"
     - env: srv=mysql v=8.4
       name: "MySQL 8.4"
     - env: srv=mysql v=9.0
