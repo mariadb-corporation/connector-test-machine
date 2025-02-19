@@ -79,8 +79,6 @@ jobs:
     - env: srv=mariadb v=11.4 local=1
       dist: jammy
       name: "CS 11.4"
-    - env: srv=mariadb v=11.6
-      name: "CS 11.6"
     - env: srv=mariadb v=11.7-rc
       name: "CS 11.7-rc"
     - env: srv=mysql v=8.4
