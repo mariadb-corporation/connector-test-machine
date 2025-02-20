@@ -70,7 +70,7 @@ jobs:
       name: "CS 11.4 - Windows"
     - stage: Community
       env: srv=mariadb v=10.5 local=1
-      dist: bionic
+      dist: focal
       name: "CS 10.5"
       node_js: 16
     - env: srv=mariadb v=10.11 local=1 CLEAR_TEXT=1
