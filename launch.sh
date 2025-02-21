@@ -125,7 +125,7 @@ install_repo () {
 
     sudo sh -c "echo 'X-Repolib-Name: MariaDB' >> /etc/apt/sources.list.d/mariadb.sources"
     sudo sh -c "echo 'Types: deb' >> /etc/apt/sources.list.d/mariadb.sources"
-    sudo sh -c "echo 'URIs: https://mirrors.ircam.fr/pub/mariadb/repo/{VERSION}/ubuntu' >> /etc/apt/sources.list.d/mariadb.sources"
+    sudo sh -c "echo 'URIs: https://mirrors.ircam.fr/pub/mariadb/repo/${VERSION}/ubuntu' >> /etc/apt/sources.list.d/mariadb.sources"
     sudo sh -c "echo 'Suites: ${TRAVIS_DIST}' >> /etc/apt/sources.list.d/mariadb.sources"
     sudo sh -c "echo 'Components: main main/debug' >> /etc/apt/sources.list.d/mariadb.sources"
     sudo sh -c "echo 'Signed-By: /etc/apt/keyrings/mariadb-keyring.pgp' >> /etc/apt/sources.list.d/mariadb.sources"
