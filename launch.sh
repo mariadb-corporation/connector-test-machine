@@ -125,7 +125,7 @@ install_repo () {
 
     sudo sh -c "echo 'X-Repolib-Name: MariaDB' >> /etc/apt/sources.list.d/mariadb.sources"
     sudo sh -c "echo 'Types: deb' >> /etc/apt/sources.list.d/mariadb.sources"
-    sudo sh -c "echo 'URIs: https://mariadb.gb.ssimn.org/repo/${VERSION}/ubuntu' >> /etc/apt/sources.list.d/mariadb.sources"
+    sudo sh -c "echo 'URIs: https://mirrors.ircam.fr/pub/mariadb/repo/{VERSION}/ubuntu' >> /etc/apt/sources.list.d/mariadb.sources"
     sudo sh -c "echo 'Suites: ${TRAVIS_DIST}' >> /etc/apt/sources.list.d/mariadb.sources"
     sudo sh -c "echo 'Components: main main/debug' >> /etc/apt/sources.list.d/mariadb.sources"
     sudo sh -c "echo 'Signed-By: /etc/apt/keyrings/mariadb-keyring.pgp' >> /etc/apt/sources.list.d/mariadb.sources"
@@ -150,17 +150,12 @@ install_local () {
     export TEST_REQUIRE_TLS=0
 
     echo "adding database and user"
-    if [ $VERSION == "10.2" ] || [ $VERSION == "10.3" ] ; then
-      mysql -uroot --password=${TEST_DB_PASSWORD} -e "create DATABASE IF NOT EXISTS ${TEST_DB_DATABASE}"
-      mysql -uroot --password=${TEST_DB_PASSWORD} ${TEST_DB_DATABASE} < $PROJ_PATH/travis/sql/dbinit.sql
+    if [[ $VERSION == 11* ]] || [[ $VERSION == 23* ]] ; then
+      sudo mariadb -e "create DATABASE IF NOT EXISTS ${TEST_DB_DATABASE}"
+      sudo mariadb ${TEST_DB_DATABASE} < $PROJ_PATH/travis/sql/dbinit.sql
     else
-      if [[ $VERSION == 11* ]] || [[ $VERSION == 23* ]] ; then
-        sudo mariadb -e "create DATABASE IF NOT EXISTS ${TEST_DB_DATABASE}"
-        sudo mariadb ${TEST_DB_DATABASE} < $PROJ_PATH/travis/sql/dbinit.sql
-      else
-        sudo mysql -e "create DATABASE IF NOT EXISTS ${TEST_DB_DATABASE}"
-        sudo mysql ${TEST_DB_DATABASE} < $PROJ_PATH/travis/sql/dbinit.sql
-      fi
+      sudo mysql -e "create DATABASE IF NOT EXISTS ${TEST_DB_DATABASE}"
+      sudo mysql ${TEST_DB_DATABASE} < $PROJ_PATH/travis/sql/dbinit.sql
     fi
     echo "adding database and user done"
 
