@@ -229,6 +229,7 @@ check_server_status () {
     fi
     if [ "$TYPE" != "mariadb" ] && [ "$LOCAL" != "1" ] ; then
       docker-compose -f ${COMPOSE_FILE} logs
+      sleep 5
       if [ "$TYPE" == "maxscale" ] ; then
           docker-compose -f ${COMPOSE_FILE} exec maxscale tail -n 500 /var/log/maxscale/maxscale.log
       fi
