@@ -270,9 +270,12 @@ launch_docker () {
       if [ -z "$NATIVE" ] || [ "$NATIVE" == 1 ] ; then
         export ADDITIONAL_CONF="--default-authentication-plugin=mysql_native_password $ADDITIONAL_CONF"
       fi
+    export ADDITIONAL_CONF="--innodb-log-file-size=$INNODB_LOG_FILE_SIZE $ADDITIONAL_CONF"
     fi
-    echo "Additional conf : $ADDITIONAL_CONF"
+  else
+    export ADDITIONAL_CONF="--innodb-log-file-size=$INNODB_LOG_FILE_SIZE $ADDITIONAL_CONF"
   fi
+  echo "Additional conf : $ADDITIONAL_CONF"
   echo "ending configuring mysql additional type"
 
   sleep 1
