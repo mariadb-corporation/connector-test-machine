@@ -142,6 +142,7 @@ install_repo () {
 install_local () {
   echo "install local version"
   if [ "$TRAVIS_OS_NAME" == "linux" ] ; then
+    export TEST_DB_ADD_PORT=3405
     sudo apt update
     echo "mariadb-server-${VERSION} mysql-server/root_password password ${TEST_DB_PASSWORD}" | sudo debconf-set-selections
     echo "mariadb-server-${VERSION} mysql-server/root_password_again password ${TEST_DB_PASSWORD}" | sudo debconf-set-selections
@@ -247,6 +248,7 @@ launch_docker () {
   echo "launch docker"
   export TEST_REQUIRE_TLS=0
   export TEST_DB_PORT=3305
+  export TEST_DB_ADD_PORT=3405
   export ENTRYPOINT=$PROJ_PATH/travis/sql
   export ENTRYPOINT_PAM=$PROJ_PATH/travis/pam
   if [ "$TYPE" == 'mariadb-es' ] || [ "$TYPE" == 'mariadb-es-test' ]; then
@@ -257,6 +259,7 @@ launch_docker () {
   export PACKET_SIZE_VAL="${PACKET_SIZE}M"
   export INNODB_LOG_FILE_SIZE="${PACKET_SIZE}0M"
 
+  export ADDITIONAL_CONF="--extra-port=3405"
   if [ "$TYPE" == mysql ] ; then
     echo "configuring mysql additional type"
 

@@ -56,7 +56,9 @@ setx TEST_DB_HOST localhost
 setx TEST_DB_PASSWORD ""
 setx TEST_DB_DATABASE %d%
 setx TEST_DB_PORT 3306
+setx TEST_DB_ADD_PORT 3405
 setx TEST_REQUIRE_TLS 0
+
 
 REM setx does not change current env.
 set TEST_DB_USER=root
@@ -64,6 +66,7 @@ set TEST_DB_HOST=localhost
 set TEST_DB_PASSWORD=
 set TEST_DB_DATABASE=%d%
 set TEST_DB_PORT=3306
+set TEST_DB_ADD_PORT=3405
 set TEST_REQUIRE_TLS=0
 
 
@@ -72,6 +75,7 @@ echo export TEST_DB_HOST=localhost >> settestenv.sh
 echo export TEST_DB_PASSWORD= >> settestenv.sh
 echo export TEST_DB_DATABASE=%d% >> settestenv.sh
 echo export TEST_DB_PORT=3306 >> settestenv.sh
+echo export TEST_DB_ADD_PORT=3405 >> settestenv.sh
 echo export TEST_REQUIRE_TLS=0 >> settestenv.sh
 
 dir .
